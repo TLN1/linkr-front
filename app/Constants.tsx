@@ -1,1 +1,4 @@
-const KONSTANTA = 5
+export const Color = {
+  BLACK: "#000",
+  WHITE: "#FFF",
+};

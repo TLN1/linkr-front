@@ -1,30 +1,37 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  NativeStackNavigationOptions,
+  NativeStackNavigationProp,
+  createNativeStackNavigator,
+} from "@react-navigation/native-stack";
 import Home from "../screens/Home";
 import About from "../screens/About";
-import { Image } from "react-native";
+import { AccountHeader, HomeButtonHeader } from "../components/Header";
 
 const Stack = createNativeStackNavigator();
-
-const LogoTitle = () => {
-  return (
-    <Image
-      style={{ width: 50, height: 50 }}
-      source={require("../assets/favicon.png")}
-    />
-  );
-};
 
 const MyStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="Home"
-        component={Home}
-        options={{ headerTitle: () => <LogoTitle /> }}
-      />
-      <Stack.Screen name="About" component={About} />
+      <Stack.Screen name="Home" component={Home} options={homeScreenOptions} />
+      <Stack.Screen name="About" component={About} options={screenOptions} />
     </Stack.Navigator>
   );
 };
 
 export default MyStack;
+
+const homeScreenOptions: NativeStackNavigationOptions = {
+  headerRight: () => <AccountHeader />,
+  headerTitleAlign: "center",
+};
+
+type Props = {
+  navigation: NativeStackNavigationProp<any, any>;
+};
+
+function screenOptions({ navigation }: Props) {
+  return {
+    ...homeScreenOptions,
+    headerTitle: () => <HomeButtonHeader navigation={navigation} />,
+  };
+}
