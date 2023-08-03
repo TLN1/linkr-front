@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Home from "../screens/Home";
 import About from "../screens/About";
+import Login from "../screens/Login";
 import { Image } from "react-native";
 
 const Stack = createNativeStackNavigator();
@@ -23,6 +24,7 @@ const MyStack = () => {
         options={{ headerTitle: () => <LogoTitle /> }}
       />
       <Stack.Screen name="About" component={About} />
+      <Stack.Screen name="Login" component={Login} />
     </Stack.Navigator>
   );
 };
