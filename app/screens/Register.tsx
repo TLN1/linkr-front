@@ -6,19 +6,19 @@ import { AuthContext } from "../context/Auth";
 import Spinner from "react-native-loading-spinner-overlay";
 
 interface Props {
-  navigation: NativeStackNavigationProp<any, "Login">;
+  navigation: NativeStackNavigationProp<any, "Register">;
 }
 
-const Login = ({ navigation }: Props) => {
+const Register = ({ navigation }: Props) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const authContext = useContext(AuthContext);
+  const { isLoading, register } = useContext(AuthContext);
 
   return (
     <View style={styles.container}>
-      <Spinner visible={authContext.isLoading} />
+      <Spinner visible={isLoading} />
       <View style={styles.wrapper}>
-        <Text>Login</Text>
+        <Text>Register</Text>
         <TextInput
           style={styles.input}
           value={username}
@@ -35,18 +35,18 @@ const Login = ({ navigation }: Props) => {
         />
 
         <Button
-          title="Login"
+          title="Register"
           onPress={() => {
             console.log(username);
             console.log(password);
-            authContext.login(username, password);
+            register(username, password);
           }}
         />
 
         <View style={{ flexDirection: "row", marginTop: 20 }}>
-          <Text>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-            <Text style={styles.link}>Register</Text>
+          <Text>Already have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={styles.link}>Login</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -75,4 +75,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Login;
+export default Register;

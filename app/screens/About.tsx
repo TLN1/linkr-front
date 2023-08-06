@@ -10,10 +10,20 @@ const About = ({ navigation }: Props) => {
   const popHandler = () => {
     navigation.pop();
   };
+
+  const pressHandler = () => {
+    navigation.push("About");
+  };
+
+  const pressLoginHandler = () => {
+    navigation.push("Login");
+  };
   return (
     <View style={global.container}>
       <Text>About</Text>
       <Button title="go to Home POP" onPress={popHandler} />
+      <Button title="About" onPress={pressHandler} />
+      <Button title="Login" onPress={pressLoginHandler} />
     </View>
   );
 };
