@@ -3,28 +3,18 @@ import { createContext, useState } from "react";
 import { BASE_URL } from "../Constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// TODO: [NK] REFACTOR!!!!
-
 export const AuthContext = createContext<AuthContextType>({
   isLoading: false,
-  checker: false,
-  userInfo: null,
-  authToken: null,
-  // getAuthToken: () => {
-  //   return null;
-  // },
   register: (username, password) => {},
   login: (username, password) => {},
+  logout: () => {},
 });
 
 export interface AuthContextType {
   isLoading: boolean;
-  checker: boolean;
-  userInfo: Account | null;
-  authToken: AuthToken | null;
-  // getAuthToken: () => string | null;
   register: (username: string, password: string) => void;
   login: (username: string, password: string) => void;
+  logout: () => void;
 }
 
 export interface AuthToken {
@@ -47,17 +37,15 @@ export const getAuthToken = () => {
   return token;
 };
 
-
 export const logout = () => {
-  AsyncStorage.removeItem('authToken');
-  AsyncStorage.removeItem('userInfo');
+  AsyncStorage.removeItem("authToken");
+  AsyncStorage.removeItem("userInfo");
 };
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children }: any) => {
   const [userInfo, setUserInfo] = useState({} as Account);
   const [authToken, setAuthToken] = useState<AuthToken>({} as AuthToken);
   const [isLoading, setIsLoading] = useState(false);
-  const [checker, setChecker] = useState(true);
 
   const register = (username: string, password: string) => {
     setIsLoading(true);
@@ -111,11 +99,9 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         isLoading,
-        checker,
-        userInfo,
-        authToken,
         register,
         login,
+        logout,
       }}
     >
       {children}

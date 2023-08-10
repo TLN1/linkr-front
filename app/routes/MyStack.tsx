@@ -4,9 +4,7 @@ import About from "../screens/About";
 import Login from "../screens/Login";
 import { Image } from "react-native";
 import {
-  AuthContext,
   AuthProvider,
-  AuthToken,
   getAuthToken,
 } from "../context/Auth";
 import Register from "../screens/Register";
