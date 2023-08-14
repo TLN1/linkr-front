@@ -18,12 +18,17 @@ const About = ({ navigation }: Props) => {
   const pressLoginHandler = () => {
     navigation.push("Login");
   };
+
+  const pressCreateCompanyHandler = () => {
+    navigation.push("CreateCompany");
+  };
   return (
     <View style={global.container}>
       <Text>About</Text>
       <Button title="go to Home POP" onPress={popHandler} />
       <Button title="About" onPress={pressHandler} />
       <Button title="Login" onPress={pressLoginHandler} />
+      <Button title="CreateCompany" onPress={pressCreateCompanyHandler} />
     </View>
   );
 };
