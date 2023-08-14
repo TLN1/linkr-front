@@ -1,14 +1,24 @@
-import { useNavigation, useNavigationState } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Image, Text, StyleSheet, Pressable } from "react-native";
+import { Image, Text, StyleSheet, Pressable, View } from "react-native";
 import { Color } from "../Constants";
 
 export const AccountHeader = () => {
   return (
-    <Pressable style={styles.accountContainer}>
-      <Image style={styles.avatar} source={require("../assets/favicon.png")} />
-      <Text style={styles.username}>Username</Text>
-    </Pressable>
+    <View style={styles.accountHeaderContainer}>
+      <Pressable>
+        <Image
+          style={styles.avatar}
+          source={require("../assets/favicon.png")}
+        />
+      </Pressable>
+      <Pressable style={styles.accountContainer}>
+        <Image
+          style={styles.avatar}
+          source={require("../assets/favicon.png")}
+        />
+        <Text style={styles.username}>Username</Text>
+      </Pressable>
+    </View>
   );
 };
 
@@ -31,17 +41,18 @@ export const HomeButtonHeader = ({ navigation }: Props) => {
 };
 
 const styles = StyleSheet.create({
+  accountHeaderContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginEnd: 10,
+  },
   homeButtonContainer: {
     alignItems: "center",
     padding: 5,
   },
   accountContainer: {
-    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-around",
-    flexWrap: "wrap",
     alignItems: "center",
-    marginEnd: 10,
     backgroundColor: Color.BLACK,
     borderRadius: 10,
     padding: 8,
@@ -51,7 +62,6 @@ const styles = StyleSheet.create({
     height: 30,
   },
   username: {
-    marginStart: 5,
     color: Color.WHITE,
     fontWeight: "bold",
   },
