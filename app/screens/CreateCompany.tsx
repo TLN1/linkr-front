@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, TextInput, Button } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { get, post } from "../axios";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props {
   navigation: NativeStackNavigationProp<any, "CreateCompany">;
@@ -121,28 +119,21 @@ const CreateCompany = ({ navigation, company }: Props) => {
             console.log(name);
             console.log(website);
             console.log(industry);
-            var tokenObj = await AsyncStorage.getItem("authToken");
-            if (tokenObj != null) {
-              var token = JSON.parse(tokenObj).access_token;
-              await axios
-                .post("http://127.0.0.1:8000/company", null, {
-                  headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer  ${token}`,
-                  },
-                  params: {
-                    name: name,
-                    website: website,
-                    industry: industry,
-                    organization_size: organizationSize,
-                  },
-                })
-                .then((res) => {
-                  console.log(res);
-                });
-            }
-            // register(username, password);
+            
+            await post("/company", null, {
+              params: {
+                name: name,
+                website: website,
+                industry: industry,
+                organization_size: organizationSize,
+              },
+            })
+              .then((res) => {
+                console.log(res);
+              })
+              .catch((e) => {
+                console.log(e);
+              });
           }}
         />
       </View>
