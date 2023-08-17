@@ -1,17 +1,24 @@
 import axios, { AxiosResponse } from "axios";
-import { getAuthToken, logout } from "./context/Auth";
+import { logout } from "./context/Auth";
 import { BASE_URL, AUTH_HEADER } from "./Constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const axiosInstanse = axios.create({ baseURL: BASE_URL });
 
-export const setAuthHeader = () => {
-  axiosInstanse.defaults.headers.common[AUTH_HEADER] =
-    `Bearer ` + getAuthToken();
-};
+axiosInstanse.interceptors.request.use(
+  async (config) => {
+    const token = await AsyncStorage.getItem("authToken");
+    if (token) {
+      const accessToken = JSON.parse(token).access_token;
+      config.headers.Authorization = "Bearer " + accessToken;
+    } 
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-export const deleteAuthHeader = () => {
-  delete axiosInstanse.defaults.headers.common[AUTH_HEADER];
-};
 
 const responseSuccessInterceptor = (response: AxiosResponse) => {
   return response;
@@ -23,7 +30,7 @@ const responseErrorInterceptor = async (error: any) => {
 
   if (error.response !== undefined) {
     if (error.response.status === 401) {
-      deleteAuthHeader();
+      // deleteAuthHeader();
       logout();
     }
   }
