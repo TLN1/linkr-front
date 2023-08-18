@@ -1,7 +1,15 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Home from "../screens/Home";
 import About from "../screens/About";
+import Login from "../screens/Login";
 import { Image } from "react-native";
+import {
+  AuthProvider,
+  getAuthToken,
+} from "../context/Auth";
+import Register from "../screens/Register";
+import { useContext } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createNativeStackNavigator();
 
@@ -15,15 +23,26 @@ const LogoTitle = () => {
 };
 
 const MyStack = () => {
+  let token = getAuthToken();
+  console.log(token);
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Home"
-        component={Home}
-        options={{ headerTitle: () => <LogoTitle /> }}
-      />
-      <Stack.Screen name="About" component={About} />
-    </Stack.Navigator>
+    <AuthProvider>
+      <Stack.Navigator>
+        {token ? (
+          <Stack.Screen
+            name="Home"
+            component={Home}
+            options={{ headerTitle: () => <LogoTitle /> }}
+          />
+        ) : (
+          <>
+            <Stack.Screen name="About" component={About} />
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Register" component={Register} />
+          </>
+        )}
+      </Stack.Navigator>
+    </AuthProvider>
   );
 };
 
