@@ -14,8 +14,8 @@ export default function MainNavigator() {
   return (
     <AuthProvider>
       <Tab.Navigator
-        activeColor={Color.ON_PRIMARY}
-        inactiveColor={Color.SECONDARY}
+        activeColor={Color.WHITE}
+        inactiveColor={Color.GRAY}
         barStyle={styles.barStyle}
       >
         <Tab.Screen
@@ -35,6 +35,6 @@ export default function MainNavigator() {
 
 const styles = StyleSheet.create({
   barStyle: {
-    backgroundColor: Color.PRIMARY,
+    backgroundColor: Color.BLACK,
   },
 });
