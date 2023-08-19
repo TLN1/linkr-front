@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   buttonLabel: {
-    color: Color.WHITE,
+    color: Color.PRIMARY,
     fontSize: 16,
   },
 });

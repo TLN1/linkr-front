@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     height: 30,
   },
   username: {
-    color: Color.WHITE,
+    color: Color.PRIMARY,
     fontWeight: "bold",
   },
 });
