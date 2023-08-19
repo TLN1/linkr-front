@@ -1,6 +1,12 @@
 import { useContext, useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Pressable,
+} from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AuthContext } from "../context/Auth";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -45,9 +51,9 @@ const Register = ({ navigation }: Props) => {
 
         <View style={{ flexDirection: "row", marginTop: 20 }}>
           <Text>Already have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+          <Pressable onPress={() => navigation.navigate("Login")}>
             <Text style={styles.link}>Login</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     </View>
