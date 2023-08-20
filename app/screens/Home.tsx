@@ -19,6 +19,11 @@ const Home = ({ navigation }: Props) => {
   const pressCreateCompanyHandler = () => {
     navigation.push("CreateCompany");
   };
+
+  const pressCompanyViewHandler = () => {
+    navigation.push("CompanyView");
+  };
+
   return (
     <View style={global.container}>
       <Text>Home</Text>
@@ -26,6 +31,7 @@ const Home = ({ navigation }: Props) => {
       <Button title="Login" onPress={pressLoginHandler} />
       <Button title="Logout" onPress={logout} />
       <Button title="CreateCompany" onPress={pressCreateCompanyHandler} />
+      <Button title="CompanyView" onPress={pressCompanyViewHandler} />
     </View>
   );
 };
