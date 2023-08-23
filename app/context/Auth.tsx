@@ -56,7 +56,12 @@ export const AuthProvider = ({ children }: any) => {
         axios.toFormData({
           username: username,
           password: password,
-        })
+        }),
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       )
       .then((res) => {
         let userInfo = res.data;
@@ -82,7 +87,12 @@ export const AuthProvider = ({ children }: any) => {
         axios.toFormData({
           username: username,
           password: password,
-        })
+        }),
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       )
       .then((res) => {
         let authToken = res.data;
