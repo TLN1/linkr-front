@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   Pressable,
@@ -10,44 +10,39 @@ import {
   StyleSheet,
 } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
-
-interface Company {
-  name: string;
-  website: string;
-  industry: string;
-  organizationSize: string;
-}
+import { get } from "../axios";
 
 interface Props {
+  id: number;
   navigation: NativeStackNavigationProp<any, "Profile">;
 }
 
-const AboutTab = (company: Company) => {
+const AboutTab = (
+  website: string,
+  industry: string,
+  organizationSize: string
+) => {
   return (
     <View>
       <View style={styles.aboutField}>
         <Text style={[styles.aboutLine, styles.aboutTitle]}>Website</Text>
-        <Text style={[styles.aboutLine, styles.aboutValue]}>
-          {company.website}
-        </Text>
+        <Text style={[styles.aboutLine, styles.aboutValue]}>{website}</Text>
       </View>
       <View style={styles.aboutField}>
         <Text style={[styles.aboutLine, styles.aboutTitle]}>Industry</Text>
-        <Text style={[styles.aboutLine, styles.aboutValue]}>
-          {company.industry}
-        </Text>
+        <Text style={[styles.aboutLine, styles.aboutValue]}>{industry}</Text>
       </View>
       <View style={styles.aboutField}>
         <Text style={[styles.aboutLine, styles.aboutTitle]}>Company size</Text>
         <Text style={[styles.aboutLine, styles.aboutValue]}>
-          {company.organizationSize}
+          {organizationSize}
         </Text>
       </View>
     </View>
   );
 };
 
-const JobAppliationsTab = (company: Company) => {
+const JobAppliationsTab = () => {
   return (
     <View>
       <Text>Job applications</Text>
@@ -55,13 +50,32 @@ const JobAppliationsTab = (company: Company) => {
   );
 };
 
-const CompanyView = ({ navigation }: Props) => {
-  const company: Company = {
-    name: "Company name",
-    website: "website.web",
-    industry: "Software Engineering",
-    organizationSize: "small",
-  };
+const CompanyView = ({ id, navigation }: Props) => {
+  useEffect(() => {
+    async function fetchCompanyData(id: number) {
+      // Fetch data
+      const { data } = await get(`/company/${id}`);
+
+      // Update the options state
+      setName(data?.name);
+      setWebsite(data?.website);
+      setIndustry(data?.industry);
+      setOrganizationSize(data?.organization_size);
+      setImage(`data:${data?.image_type};base64,${data?.image}`);
+      setCoverImage(
+        `data:${data?.cover_image_type};base64,${data?.cover_image}`
+      );
+    }
+
+    if (id) fetchCompanyData(id);
+  }, []);
+
+  const [name, setName] = useState("");
+  const [website, setWebsite] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [organizationSize, setOrganizationSize] = useState("");
+  const [image, setImage] = useState("");
+  const [coverImage, setCoverImage] = useState("");
 
   const [tabViewIndex, setTabViewIndex] = useState(0);
   const routes = [
@@ -82,8 +96,10 @@ const CompanyView = ({ navigation }: Props) => {
         >
           <Pressable>
             <Image
-              source={require("../assets/favicon.png")}
-              style={{ width: 30, height: 30 }}
+              source={{
+                uri: coverImage,
+              }}
+              style={{ width: Dimensions.get("window").width, height: 150 }}
             ></Image>
             <View></View>
             <View></View>
@@ -93,7 +109,9 @@ const CompanyView = ({ navigation }: Props) => {
           style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
         >
           <Image
-            source={require("../assets/icon.png")}
+            source={{
+              uri: image,
+            }}
             style={{
               width: 140,
               height: 140,
@@ -103,18 +121,16 @@ const CompanyView = ({ navigation }: Props) => {
           ></Image>
         </View>
         <View style={{ padding: 10, marginLeft: "4%" }}>
-          <Text style={{ fontSize: 30, fontWeight: "bold" }}>
-            {company.name}
-          </Text>
+          <Text style={{ fontSize: 30, fontWeight: "bold" }}>{name}</Text>
           <Text style={{ fontSize: 15, fontWeight: "bold", color: "grey" }}>
-            {company.industry}
+            {industry}
           </Text>
         </View>
         <View style={styles.container}>
           <TabView
             navigationState={{ index: tabViewIndex, routes: routes }}
             renderScene={SceneMap({
-              about: () => AboutTab(company),
+              about: () => AboutTab(website, industry, organizationSize),
               jobApplications: JobAppliationsTab,
             })}
             onIndexChange={(index) => setTabViewIndex(index)}
