@@ -1,3 +1,4 @@
+import React from "react";
 import { View, Text, Button } from "react-native";
 import { global } from "../styles/global";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -15,6 +16,7 @@ const Home = ({ navigation }: Props) => {
   const pressLoginHandler = () => {
     navigation.push("Login");
   };
+
   return (
     <View style={global.container}>
       <Text>Home</Text>

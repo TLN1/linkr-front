@@ -1,3 +1,4 @@
+import React from 'react';
 import { useContext, useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
