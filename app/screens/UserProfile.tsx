@@ -15,17 +15,18 @@ import {
 } from "react-native";
 
 interface Education {
-  institution: string;
-  degree: string;
+  name: string;
+  description: string;
 }
 
 interface Skill {
   name: string;
+  description: string;
 }
 
 interface Experience {
-  title: string;
-  company: string;
+  name: string;
+  description: string;
 }
 
 interface User {
@@ -38,53 +39,81 @@ interface User {
 interface Props {
   navigation: NativeStackNavigationProp<any, "Profile">;
 }
-const UserProfile = ({ navigation }: Props) => {
+const UserProfile = ({ navigation}: Props) => {
+  let user: User = {
+    username: "exampleUser",
+    education: [],
+    skills: [],
+    experience: []
+  };
 
   const [addingItem, setAddingItem] = useState("");
 
-  const [expreniences, setExperiences] = useState<Experience[]>([]);
+  const [expreniences, setExperiences] = useState<Experience[]>(user.experience);
 
   const [newExperience, setNewExperience] = useState<Experience>({
-    title: "",
-    company: "",
+    name: "",
+    description: "",
   });
 
-  const [educations, setEducations] = useState<Education[]>([]);
+  const [educations, setEducations] = useState<Education[]>(user.education);
 
   const [newEducation, setNewEducation] = useState<Education>({
-    institution: "",
-    degree: "",
+    name: "",
+    description: "",
   });
 
-  const [skills, setSkills] = useState<Skill[]>([]);
+  const [skills, setSkills] = useState<Skill[]>(user.skills);
 
   const [newSkill, setNewSkill] = useState<Skill>({
     name: "",
+    description: "",
   });
 
   const handleSaveExperience = () => {
+
     setAddingItem("")
 
-    setNewExperience({ title: "", company: "" }); // Clear the input fields
+    // setExperiences([...expreniences, newExperience]);
+    expreniences.push(newExperience);
 
-    setExperiences([...expreniences, newExperience]);
+    setNewExperience({ name: "", description: "" }); // Clear the input fields
+
+    console.log(educations);
+    console.log(skills);
+    console.log(expreniences);
+
   };
 
   const handleSaveEducation = () => {
+
     setAddingItem("")
 
-    setNewEducation({ institution: "", degree: "" }); // Clear the input fields
+    educations.push(newEducation);
 
-    setEducations([...educations, newEducation]);
+    setNewEducation({ name: "", description: "" }); // Clear the input fields
+
+    // setEducations([...educations, newEducation]);
+
+    console.log(educations);
+    console.log(skills);
+    console.log(expreniences);
+
   };
 
   const handleSaveSkill = () => {
 
     setAddingItem("")
 
-    setNewSkill({ name: "" }); // Clear the input fields
+    skills.push(newSkill);
 
-    setSkills([...skills, newSkill]);
+    setNewSkill({ name: "" , description: ""}); // Clear the input fields
+
+    // setSkills([...skills, newSkill]);
+
+    console.log(educations);
+    console.log(skills);
+    console.log(expreniences);
   };
 
 
@@ -92,24 +121,27 @@ const UserProfile = ({ navigation }: Props) => {
   const renderEducationItem = ({ item }: { item: Education }) => (
     <View style={styles.aboutField}>
       <Text style={[styles.aboutLine, styles.aboutTitle]}>Institution</Text>
-      <Text style={[styles.aboutLine, styles.aboutValue]}>{item.institution}</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>{item.name}</Text>
       <Text style={[styles.aboutLine, styles.aboutTitle]}>Degree</Text>
-      <Text style={[styles.aboutLine, styles.aboutValue]}>{item.degree}</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>{item.description}</Text>
     </View>
   );
 
   const renderSkillsItem = ({ item }: { item: Skill }) => (
     <View style={styles.aboutField}>
+      <Text style={[styles.aboutLine, styles.aboutTitle]}>Name</Text>
       <Text style={[styles.aboutLine, styles.aboutValue]}>{item.name}</Text>
+      <Text style={[styles.aboutLine, styles.aboutTitle]}>description</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>{item.description}</Text>
     </View>
   );
 
   const renderExperienceItem = ({ item }: { item: Experience }) => (
     <View style={styles.aboutField}>
       <Text style={[styles.aboutLine, styles.aboutTitle]}>Title</Text>
-      <Text style={[styles.aboutLine, styles.aboutValue]}>{item.title}</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>{item.name}</Text>
       <Text style={[styles.aboutLine, styles.aboutTitle]}>Company</Text>
-      <Text style={[styles.aboutLine, styles.aboutValue]}>{item.company}</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>{item.description}</Text>
     </View>
   );
 
@@ -124,7 +156,7 @@ const UserProfile = ({ navigation }: Props) => {
       renderItem: renderEducationItem as ({ item }: { item: Education | Skill | Experience }) => JSX.Element,
     },
     {
-      title: "Skills",
+      title: "Skill",
       data: skills,
       renderItem: renderSkillsItem as ({ item }: { item: Education | Skill | Experience } ) => JSX.Element,
     },
@@ -145,7 +177,7 @@ const UserProfile = ({ navigation }: Props) => {
           setAddingItem("Experience")
         } else if (title === "Education") {
           setAddingItem("Education")
-        } else if (title == "Skill") {
+        } else if (title === "Skill") {
           setAddingItem("Skill")
         }
       }}
@@ -163,22 +195,22 @@ const UserProfile = ({ navigation }: Props) => {
           <View style={styles.dialogContainer}>
             <TextInput
               placeholder="Degree"
-              value={newEducation.degree}
-              onChangeText={(degree) =>
+              value={newEducation.name}
+              onChangeText={(name) =>
                 setNewEducation((prevEducation) => ({
                   ...prevEducation,
-                  degree,
+                  name,
                 }))
               }
               style={styles.input}
             />
             <TextInput
               placeholder="Institution"
-              value={newEducation.institution}
-              onChangeText={(institution) =>
+              value={newEducation.description}
+              onChangeText={(description) =>
                 setNewEducation((prevEducation) => ({
                   ...prevEducation,
-                  institution,
+                  description,
                 }))
               }
               style={styles.input}
@@ -205,12 +237,24 @@ const UserProfile = ({ navigation }: Props) => {
           <View style={styles.dialogOverlay}>
             <View style={styles.dialogContainer}>
               <TextInput
-                placeholder="Skill"
+                placeholder="Skill Name"
                 value={newSkill.name}
                 onChangeText={(name) =>
                   setNewSkill((prevSkill) => ({
                     ...prevSkill,
                     name,
+                  }))
+                }
+                style={styles.input}
+              />
+              
+              <TextInput
+                placeholder="Skill Description"
+                value={newSkill.description}
+                onChangeText={(description) =>
+                  setNewSkill((prevSkill) => ({
+                    ...prevSkill,
+                    description,
                   }))
                 }
                 style={styles.input}
@@ -238,22 +282,22 @@ const UserProfile = ({ navigation }: Props) => {
           <View style={styles.dialogContainer}>
             <TextInput
               placeholder="Experience Name"
-              value={newExperience.title}
-              onChangeText={(title) =>
+              value={newExperience.name}
+              onChangeText={(name) =>
                 setNewExperience((prevExperience) => ({
                   ...prevExperience,
-                  title,
+                  name,
                 }))
               }
               style={styles.input}
             />
             <TextInput
               placeholder="Experience Company"
-              value={newExperience.company}
-              onChangeText={(company) =>
+              value={newExperience.description}
+              onChangeText={(description) =>
                 setNewExperience((prevExperience) => ({
                   ...prevExperience,
-                  company,
+                  description,
                 }))
               }
               style={styles.input}
