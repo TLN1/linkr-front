@@ -86,7 +86,6 @@ const CompanyView = ({ id, navigation }: Props) => {
     <View style={{ backgroundColor: "white" }}>
       <View
         style={{
-          padding: 10,
           width: "100%",
           backgroundColor: "#000",
           height: 150,

@@ -32,13 +32,12 @@ const MyStack = () => {
               component={Home}
               options={{ headerTitle: () => <LogoTitle /> }}
             />
-            <Stack.Screen
-              name="CreateCompany"
-              component={CreateCompany}
-              options={{ headerTitle: () => <LogoTitle /> }}
-            />
-            <Stack.Screen name="CompanyView" >
-              {props => <CompanyView {...props} id={13}/>}
+            <Stack.Screen name="CreateCompany" component={CreateCompany} />
+            <Stack.Screen name="UpdateCompany">
+              {(props) => <CreateCompany {...props} id={16} />}
+            </Stack.Screen>
+            <Stack.Screen name="CompanyView">
+              {(props) => <CompanyView {...props} id={16} />}
             </Stack.Screen>
           </>
         ) : (
@@ -47,8 +46,11 @@ const MyStack = () => {
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Register" component={Register} />
             <Stack.Screen name="CreateCompany" component={CreateCompany} />
-            <Stack.Screen name="CompanyView" >
-              {props => <CompanyView {...props} id={13}/>}
+            <Stack.Screen name="UpdateCompany">
+              {(props) => <CreateCompany {...props} id={16} />}
+            </Stack.Screen>
+            <Stack.Screen name="CompanyView">
+              {(props) => <CompanyView {...props} id={16} />}
             </Stack.Screen>
           </>
         )}

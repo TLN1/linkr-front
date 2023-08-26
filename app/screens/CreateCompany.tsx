@@ -11,7 +11,7 @@ import {
   Dimensions,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { get, post } from "../axios";
+import { get, post, put } from "../axios";
 import * as ImagePicker from "expo-image-picker";
 
 interface Props {
@@ -101,7 +101,7 @@ const CreateCompany = ({ navigation, id }: Props) => {
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
 
-  const [industry, setInsdustry] = useState("");
+  const [industry, setIndustry] = useState("");
   const [industryOpen, setIndustryOpen] = useState(false);
   const [industryItems, setIndustryItems] = useState([]);
 
@@ -140,6 +140,19 @@ const CreateCompany = ({ navigation, id }: Props) => {
       setOrganizationSizeItems(results);
     }
 
+    async function fetchCompanyData(id: number) {
+      // Fetch data
+      const { data } = await get(`/company/${id}`);
+
+      // Update the options state
+      setName(data?.name);
+      setWebsite(data?.website);
+      setIndustry(data?.industry);
+      setOrganizationSize(data?.organization_size);
+      setImage(data?.image_uri);
+      setCoverImage(data?.cover_image_uri);
+    }
+
     // Trigger the fetch
     fetchIndustryData();
     fetchOrganizationSizeData();
@@ -148,6 +161,8 @@ const CreateCompany = ({ navigation, id }: Props) => {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       setHasGalleryPermission(galleryStatus.status === "granted");
     })();
+
+    if (id) fetchCompanyData(id);
   }, []);
 
   return (
@@ -227,7 +242,7 @@ const CreateCompany = ({ navigation, id }: Props) => {
           value={industry}
           items={industryItems}
           setOpen={setIndustryOpen}
-          setValue={setInsdustry}
+          setValue={setIndustry}
           placeholder="Select industry"
           //   setItems={setIndustryItems}
         />
@@ -249,20 +264,37 @@ const CreateCompany = ({ navigation, id }: Props) => {
             title="Setup company"
             color={"black"}
             onPress={async () => {
-              await post("/company", {
-                name: name,
-                website: website,
-                industry: industry,
-                organization_size: organizationSize,
-                image_uri: image,
-                cover_image_uri: coverImage,
-              })
-                .then((res) => {
-                  console.log(res);
+              if (id) {
+                await put(`/company/${id}`, {
+                  name: name,
+                  website: website,
+                  industry: industry,
+                  organization_size: organizationSize,
+                  image_uri: image,
+                  cover_image_uri: coverImage,
                 })
-                .catch((e) => {
-                  console.log(e);
-                });
+                  .then((res) => {
+                    console.log(res);
+                  })
+                  .catch((e) => {
+                    console.log(e);
+                  });
+              } else {
+                await post("/company/", {
+                  name: name,
+                  website: website,
+                  industry: industry,
+                  organization_size: organizationSize,
+                  image_uri: image,
+                  cover_image_uri: coverImage,
+                })
+                  .then((res) => {
+                    console.log(res);
+                  })
+                  .catch((e) => {
+                    console.log(e);
+                  });
+              }
             }}
           />
         </View>
