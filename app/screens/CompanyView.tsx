@@ -23,7 +23,7 @@ const AboutTab = (
   organizationSize: string
 ) => {
   return (
-    <View>
+    <ScrollView>
       <View style={styles.aboutField}>
         <Text style={[styles.aboutLine, styles.aboutTitle]}>Website</Text>
         <Text style={[styles.aboutLine, styles.aboutValue]}>{website}</Text>
@@ -38,15 +38,16 @@ const AboutTab = (
           {organizationSize}
         </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const JobAppliationsTab = () => {
+  // TODO: api sync
   return (
-    <View>
+    <ScrollView>
       <Text>Job applications</Text>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -61,10 +62,8 @@ const CompanyView = ({ id, navigation }: Props) => {
       setWebsite(data?.website);
       setIndustry(data?.industry);
       setOrganizationSize(data?.organization_size);
-      setImage(`data:${data?.image_type};base64,${data?.image}`);
-      setCoverImage(
-        `data:${data?.cover_image_type};base64,${data?.cover_image}`
-      );
+      setImage(data?.image_uri);
+      setCoverImage(data?.cover_image_uri);
     }
 
     if (id) fetchCompanyData(id);
@@ -85,71 +84,65 @@ const CompanyView = ({ id, navigation }: Props) => {
 
   return (
     <View style={{ backgroundColor: "white" }}>
-      <ScrollView>
-        <View
-          style={{
-            padding: 10,
-            width: "100%",
-            backgroundColor: "#000",
-            height: 150,
-          }}
-        >
-          <Pressable>
-            <Image
-              source={{
-                uri: coverImage,
-              }}
-              style={{ width: Dimensions.get("window").width, height: 150 }}
-            ></Image>
-            <View></View>
-            <View></View>
-          </Pressable>
-        </View>
-        <View
-          style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
-        >
+      <View
+        style={{
+          padding: 10,
+          width: "100%",
+          backgroundColor: "#000",
+          height: 150,
+        }}
+      >
+        <Pressable>
           <Image
             source={{
-              uri: image,
+              uri: coverImage,
             }}
-            style={{
-              width: 140,
-              height: 140,
-              borderRadius: 100,
-              marginTop: -70,
-            }}
+            style={{ width: Dimensions.get("window").width, height: 150 }}
           ></Image>
-        </View>
-        <View style={{ padding: 10, marginLeft: "4%" }}>
-          <Text style={{ fontSize: 30, fontWeight: "bold" }}>{name}</Text>
-          <Text style={{ fontSize: 15, fontWeight: "bold", color: "grey" }}>
-            {industry}
-          </Text>
-        </View>
-        <View style={styles.container}>
-          <TabView
-            navigationState={{ index: tabViewIndex, routes: routes }}
-            renderScene={SceneMap({
-              about: () => AboutTab(website, industry, organizationSize),
-              jobApplications: JobAppliationsTab,
-            })}
-            onIndexChange={(index) => setTabViewIndex(index)}
-            initialLayout={{ width: Dimensions.get("window").width }}
-            renderTabBar={(props) => (
-              <TabBar
-                {...props}
-                renderLabel={({ route, color }) => (
-                  <Text style={{ color: "black", margin: 8 }}>
-                    {route.title}
-                  </Text>
-                )}
-                style={{ backgroundColor: "white" }}
-                indicatorStyle={{ backgroundColor: "black" }}
-              />
-            )}
-          ></TabView>
-        </View>
-      </ScrollView>
+          <View></View>
+          <View></View>
+        </Pressable>
+      </View>
+      <View style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}>
+        <Image
+          source={{
+            uri: image,
+          }}
+          style={{
+            width: 140,
+            height: 140,
+            borderRadius: 100,
+            marginTop: -70,
+          }}
+        ></Image>
+      </View>
+      <View style={{ padding: 10, marginLeft: "4%" }}>
+        <Text style={{ fontSize: 30, fontWeight: "bold" }}>{name}</Text>
+        <Text style={{ fontSize: 15, fontWeight: "bold", color: "grey" }}>
+          {industry}
+        </Text>
+      </View>
+      <View style={styles.tabViewContainer}>
+        <TabView
+          navigationState={{ index: tabViewIndex, routes: routes }}
+          renderScene={SceneMap({
+            about: () => AboutTab(website, industry, organizationSize),
+            jobApplications: JobAppliationsTab,
+          })}
+          onIndexChange={(index) => setTabViewIndex(index)}
+          initialLayout={{ width: Dimensions.get("window").width }}
+          renderTabBar={(props) => (
+            <TabBar
+              {...props}
+              renderLabel={({ route, color }) => (
+                <Text style={{ color: "black", margin: 8 }}>{route.title}</Text>
+              )}
+              style={{ backgroundColor: "white" }}
+              indicatorStyle={{ backgroundColor: "black" }}
+            />
+          )}
+        ></TabView>
+      </View>
     </View>
   );
 };
@@ -159,6 +152,9 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 5,
     backgroundColor: "white",
+  },
+  tabViewContainer: {
+    height: Dimensions.get("window").height,
   },
   aboutField: {
     padding: 10,
