@@ -1,4 +1,3 @@
-import React from "react";
 import Home from "../screens/Home";
 import { getAuthToken } from "../context/Auth";
 import AuthProvider from "../context/Auth";

@@ -1,4 +1,3 @@
-import React from "react";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Image, Text, StyleSheet, Pressable, View } from "react-native";
 import { Color } from "../Constants";
