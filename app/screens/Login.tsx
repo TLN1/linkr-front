@@ -11,6 +11,7 @@ import { AuthContext } from "../context/Auth";
 import Spinner from "react-native-loading-spinner-overlay";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import TlnButton from "../components/TlnButton";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface NavigationProps {
   navigation: NativeStackNavigationProp<any, "Login">;
@@ -48,8 +49,8 @@ function Helper({ navigation, register }: HelperProps) {
   };
 
   const submitOnPress = () => {
-    console.log(username);
-    console.log(password);
+    if (username.length === 0 || password.length === 0) {
+    }
 
     if (register) {
       authContext.register(username, password);
@@ -62,7 +63,7 @@ function Helper({ navigation, register }: HelperProps) {
     <View style={styles.container}>
       <Spinner visible={authContext.isLoading} />
       <View style={styles.wrapper}>
-        <Text>{label}</Text>
+        <Text style={styles.title}>{label}</Text>
         <TextInput
           style={styles.input}
           value={username}
@@ -106,7 +107,13 @@ const styles = StyleSheet.create({
     display: "flex",
     rowGap: 9,
   },
+  title: {
+    marginBottom: 10,
+    fontSize: 22,
+    fontWeight: "bold",
+  },
   input: {
+    height: 48,
     borderWidth: 1,
     borderColor: "#bbb",
     borderRadius: 5,
