@@ -50,13 +50,19 @@ const AuthProvider = ({ children }: any) => {
 
   const register = (username: string, password: string) => {
     setIsLoading(true);
+
     axios
       .post(
         `${BASE_URL}/register`,
         axios.toFormData({
           username: username,
           password: password,
-        })
+        }),
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       )
       .then((res) => {
         let userInfo = res.data;
@@ -69,30 +75,37 @@ const AuthProvider = ({ children }: any) => {
       })
       .catch((e) => {
         console.log(`register error ${e}`);
-        setIsLoading(false);
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const login = (username: string, password: string) => {
     setIsLoading(true);
+
     axios
       .post(
         `${BASE_URL}/token`,
         axios.toFormData({
           username: username,
           password: password,
-        })
+        }),
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       )
       .then((res) => {
         let authToken = res.data;
         setAuthToken(authToken);
         AsyncStorage.setItem("authToken", JSON.stringify(authToken));
-        setIsLoading(false);
         console.log(authToken);
       })
       .catch((e) => {
+        console.log(`${BASE_URL}/token`);
         console.log(`login error ${e}`);
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   return (
