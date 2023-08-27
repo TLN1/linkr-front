@@ -1,5 +1,6 @@
 import Home from "../screens/Home";
-import { AuthProvider, getAuthToken } from "../context/Auth";
+import { getAuthToken } from "../context/Auth";
+import AuthProvider from "../context/Auth";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import AccountNavigator from "./AccountNavigator";
 
