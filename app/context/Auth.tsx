@@ -33,6 +33,7 @@ export interface Account {
 export const getAuthToken = () => {
   const [token, setToken] = useState(null);
   AsyncStorage.getItem("authToken").then((token) => {
+    console.log(token);
     if (token != null) setToken(JSON.parse(token).access_token);
   });
   return token;
@@ -43,7 +44,7 @@ export const logout = () => {
   AsyncStorage.removeItem("userInfo");
 };
 
-export const AuthProvider = ({ children }: any) => {
+const AuthProvider = ({ children }: any) => {
   const [userInfo, setUserInfo] = useState({} as Account);
   const [authToken, setAuthToken] = useState<AuthToken>({} as AuthToken);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +71,7 @@ export const AuthProvider = ({ children }: any) => {
         AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
 
         login(username, password);
-
+        setIsLoading(false);
         console.log(userInfo);
       })
       .catch((e) => {
@@ -121,3 +122,4 @@ export const AuthProvider = ({ children }: any) => {
     </AuthContext.Provider>
   );
 };
+export default AuthProvider;
