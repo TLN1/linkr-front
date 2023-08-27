@@ -1,17 +1,10 @@
 import { useContext, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  Pressable,
-} from "react-native";
+import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 import { AuthContext } from "../context/Auth";
 import Spinner from "react-native-loading-spinner-overlay";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import TlnButton from "../components/TlnButton";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { showErrorToast } from "../components/toast";
 
 interface NavigationProps {
   navigation: NativeStackNavigationProp<any, "Login">;
@@ -32,6 +25,8 @@ export function Login({ navigation }: NavigationProps) {
 function Helper({ navigation, register }: HelperProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isUsernameValid, setIsUsernameValid] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   const authContext = useContext(AuthContext);
 
   const label = register ? "Register" : "Login";
@@ -49,7 +44,9 @@ function Helper({ navigation, register }: HelperProps) {
   };
 
   const submitOnPress = () => {
-    if (username.length === 0 || password.length === 0) {
+    if (!isUsernameValid || !isPasswordValid) {
+      showErrorToast("Username or password is empty");
+      return;
     }
 
     if (register) {
@@ -59,22 +56,35 @@ function Helper({ navigation, register }: HelperProps) {
     }
   };
 
+  const onChangeInputText = (value: string, type: "username" | "password") => {
+    const isValid = value !== "";
+
+    if (type === "username") {
+      setIsUsernameValid(isValid);
+      setUsername(value);
+    } else if (type === "password") {
+      setIsPasswordValid(isValid);
+      setPassword(value);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Spinner visible={authContext.isLoading} />
       <View style={styles.wrapper}>
         <Text style={styles.title}>{label}</Text>
+
         <TextInput
-          style={styles.input}
+          style={[styles.input, !isUsernameValid ? { borderColor: "red" } : {}]}
           value={username}
-          onChangeText={(text) => setUsername(text)}
+          onChangeText={(text) => onChangeInputText(text, "username")}
           placeholder="Enter username"
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, !isPasswordValid ? { borderColor: "red" } : {}]}
           value={password}
-          onChangeText={(text) => setPassword(text)}
+          onChangeText={(text) => onChangeInputText(text, "password")}
           placeholder="Enter password"
           secureTextEntry
         />
@@ -108,8 +118,8 @@ const styles = StyleSheet.create({
     rowGap: 9,
   },
   title: {
-    marginBottom: 10,
-    fontSize: 22,
+    marginBottom: 15,
+    fontSize: 34,
     fontWeight: "bold",
   },
   input: {
@@ -118,6 +128,7 @@ const styles = StyleSheet.create({
     borderColor: "#bbb",
     borderRadius: 5,
     marginTop: 5,
+    fontSize: 20,
     paddingHorizontal: 14,
   },
   registerPromptContainer: {

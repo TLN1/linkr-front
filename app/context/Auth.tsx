@@ -1,7 +1,8 @@
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useState } from "react";
 import { BASE_URL } from "../Constants";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { post } from "../axios";
 
 export const AuthContext = createContext<AuthContextType>({
   isLoading: false,
@@ -38,10 +39,10 @@ export const getAuthToken = () => {
   return token;
 };
 
-export const logout = () => {
+function logout() {
   AsyncStorage.removeItem("authToken");
   AsyncStorage.removeItem("userInfo");
-};
+}
 
 const AuthProvider = ({ children }: any) => {
   const [userInfo, setUserInfo] = useState({} as Account);
@@ -51,19 +52,18 @@ const AuthProvider = ({ children }: any) => {
   const register = (username: string, password: string) => {
     setIsLoading(true);
 
-    axios
-      .post(
-        `${BASE_URL}/register`,
-        axios.toFormData({
-          username: username,
-          password: password,
-        }),
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      )
+    post(
+      `${BASE_URL}/register`,
+      axios.toFormData({
+        username: username,
+        password: password,
+      }),
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    )
       .then((res) => {
         let userInfo = res.data;
         setUserInfo(userInfo);
@@ -73,38 +73,32 @@ const AuthProvider = ({ children }: any) => {
         setIsLoading(false);
         console.log(userInfo);
       })
-      .catch((e) => {
-        console.log(`register error ${e}`);
-      })
+      .catch((e) => {})
       .finally(() => setIsLoading(false));
   };
 
   const login = (username: string, password: string) => {
     setIsLoading(true);
 
-    axios
-      .post(
-        `${BASE_URL}/token`,
-        axios.toFormData({
-          username: username,
-          password: password,
-        }),
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      )
+    post(
+      `${BASE_URL}/token`,
+      axios.toFormData({
+        username: username,
+        password: password,
+      }),
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    )
       .then((res) => {
         let authToken = res.data;
         setAuthToken(authToken);
         AsyncStorage.setItem("authToken", JSON.stringify(authToken));
         console.log(authToken);
       })
-      .catch((e) => {
-        console.log(`${BASE_URL}/token`);
-        console.log(`login error ${e}`);
-      })
+      .catch((e) => {})
       .finally(() => setIsLoading(false));
   };
 

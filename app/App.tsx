@@ -1,10 +1,13 @@
 import { NavigationContainer } from "@react-navigation/native";
 import MainNavigator from "./routes/MainNavigator";
+import { RootSiblingParent } from "react-native-root-siblings";
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <MainNavigator />
-    </NavigationContainer>
+    <RootSiblingParent>
+      <NavigationContainer>
+        <MainNavigator />
+      </NavigationContainer>
+    </RootSiblingParent>
   );
 }
