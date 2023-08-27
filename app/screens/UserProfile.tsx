@@ -14,7 +14,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { get, post, put } from "../axios";
-import { AuthContext } from "../context/Auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
@@ -33,26 +32,14 @@ interface Experience {
   description: string;
 }
 
-interface User {
-  username: string;
-  education: Education[];
-  skills: Skill[];
-  experience: Experience[];
-}
-
 interface Props {
   navigation: NativeStackNavigationProp<any, "Profile">;
 }
 const UserProfile = ({ navigation}: Props) => {
-  // let user: User = {
-  //   username: "exampleUser",
-  //   education: [],
-  //   skills: [],
-  //   experience: []
-  // }
-  // const [user, setUser] = useState<User | null>(null); // State to store fetched user data
 
   const [addingItem, setAddingItem] = useState("");
+
+  const [username, setUsername] = useState("")
 
   const [expreniences, setExperiences] = useState<Experience[]>([]);
 
@@ -76,7 +63,6 @@ const UserProfile = ({ navigation}: Props) => {
   });
 
   useEffect(() => {
-    // Fetch user data when the component mounts
     const fetchUserData = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
@@ -89,15 +75,15 @@ const UserProfile = ({ navigation}: Props) => {
               Authorization: `Bearer ${accessToken}`,
             },
           });
-          const userData = response.data; // Fetched user data
-          // setUser(userData);
+          const userData = response.data; 
 
           console.log(userData);
+          console.log(response.data?.username);
 
-          // setEducations(userData.education || []);          
-          // setExperiences(response.data?.exprenience);
-          // setSkills(response.data?.skills);
-          // setUser(response.data); // Set the fetched user data to the state
+          setEducations(userData.education || []);          
+          setExperiences(response.data?.exprenience || []);
+          setSkills(response.data?.skills || []);
+          setUsername(response.data?.username || "");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -107,27 +93,7 @@ const UserProfile = ({ navigation}: Props) => {
     fetchUserData();
   }, []);
 
-  const handleSaveExperience = () => {
-
-    setAddingItem("")
-
-    expreniences.push(newExperience);
-
-    setNewExperience({ name: "", description: "" }); // Clear the input fields
-
-    console.log(educations);
-    console.log(skills);
-    console.log(expreniences);
-
-  };
-
-  const handleSaveEducation = async () => {
-    setAddingItem("")
-
-    educations.push(newEducation);
-
-    setNewEducation({ name: "", description: "" }); // Clear the input fields
-
+  const updateUser = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
       if (token) {
@@ -136,7 +102,7 @@ const UserProfile = ({ navigation}: Props) => {
         await put(
           "/user/update",  
           {
-            username: "t", 
+            username: username, 
             education: educations, 
             skills: skills,
             experience: expreniences,
@@ -148,12 +114,32 @@ const UserProfile = ({ navigation}: Props) => {
           }
           );
   
-        setEducations([...educations, newEducation]);
-        setNewEducation({ name: "", description: "" });
       }
     } catch (error) {
       console.error("Error updating education:", error);
     }
+  }
+
+  const handleSaveExperience = () => {
+
+    setAddingItem("")
+
+    expreniences.push(newExperience);
+
+    setNewExperience({ name: "", description: "" }); // Clear the input fields
+
+    updateUser();
+
+  };
+
+  const handleSaveEducation = async () => {
+    setAddingItem("")
+
+    educations.push(newEducation);
+
+    setNewEducation({ name: "", description: "" }); // Clear the input fields
+
+    updateUser();
 
   };
 
@@ -163,11 +149,10 @@ const UserProfile = ({ navigation}: Props) => {
 
     skills.push(newSkill);
 
-    setNewSkill({ name: "" , description: ""}); // Clear the input fields
+    setNewSkill({ name: "" , description: ""}); 
 
-    console.log(educations);
-    console.log(skills);
-    console.log(expreniences);
+    updateUser();
+
   };
 
 
@@ -408,7 +393,7 @@ const UserProfile = ({ navigation}: Props) => {
         </View>
         <View style={{ padding: 10, marginLeft: "4%" }}>
           <Text style={{ fontSize: 30, fontWeight: "bold" }}>
-            {"User Name"}
+            {username}
           </Text>
         </View>
         <View style={{ flexDirection: 'row', marginLeft: '4%' }}>
