@@ -6,10 +6,14 @@ export function showErrorToast(message: string) {
     opacity: 100,
     backgroundColor: Color.LIGHT_RED,
     textColor: Color.BLACK,
+    animation: true,
+    shadow: true,
     textStyle: {
       fontWeight: "bold",
     },
     containerStyle: {
+      elevation: 3,
+      marginBottom: 40,
       borderLeftWidth: 4,
       borderLeftColor: Color.RED,
       alignContent: "center",

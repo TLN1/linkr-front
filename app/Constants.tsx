@@ -3,7 +3,7 @@ export const enum Color {
   WHITE = "#FFF",
   GRAY = "#555",
   RED = "red",
-  LIGHT_RED = "#FFA8A9",
+  LIGHT_RED = "#ffd7d8",
 }
 
 export const BASE_URL = "http://192.168.0.116:8000"; // Replace with your ip:port where backend is running
