@@ -12,10 +12,11 @@ import {
   Button,
   TextInput,
   TouchableOpacity,
+  Modal
 } from "react-native";
 import { get, post, put } from "../axios";
+import PreferenceDialog from "./PreferencesDialog";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 
 interface Education {
   name: string;
@@ -36,6 +37,8 @@ interface Props {
   navigation: NativeStackNavigationProp<any, "Profile">;
 }
 const UserProfile = ({ navigation}: Props) => {
+
+  const [isPreferenceModalVisible, setIsPreferenceModalVisible] = useState(false);
 
   const [addingItem, setAddingItem] = useState("");
 
@@ -377,6 +380,20 @@ const UserProfile = ({ navigation}: Props) => {
             <View></View>
             <View></View>
           </Pressable>
+          <Pressable onPress={() => setIsPreferenceModalVisible(true)}>
+          <Image
+            source={require('../assets/icon.png')}
+            style={{ width: 30, height: 30 }}
+          />
+          </Pressable>
+          <Pressable
+            style={styles.preferenceButton}
+            onPress={() => setIsPreferenceModalVisible(true)}
+          >
+            <Text style={styles.preferenceButtonText}>Preferences</Text>
+          </Pressable>
+
+
         </View>
         <View
           style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
@@ -416,10 +433,18 @@ const UserProfile = ({ navigation}: Props) => {
         )}
       />
 
-      {addingItem && (
-        <AddItemDialog
-        />
-      )}
+      {addingItem && <AddItemDialog />}
+      <Modal
+        visible={isPreferenceModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsPreferenceModalVisible(false)}
+      >
+        {/* Render your PreferenceDialog component here */}
+        <View style={styles.modalContainer}>
+          <PreferenceDialog onClose={() => setIsPreferenceModalVisible(false)} />
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -523,6 +548,23 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: "white",
     fontWeight: "bold",
+  },
+  preferenceButton: {
+    backgroundColor: 'black',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  preferenceButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 });
 
