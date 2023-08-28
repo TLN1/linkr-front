@@ -8,13 +8,16 @@ import {
   Text,
   Dimensions,
   StyleSheet,
+  Modal,
+  Button,
 } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { get } from "../axios";
+import JobApplication from "../components/JobApplication";
 
 interface Props {
   id: number;
-  navigation: NativeStackNavigationProp<any, "Profile">;
+  navigation: NativeStackNavigationProp<any, "Coompany">;
 }
 
 const AboutTab = (
@@ -42,11 +45,34 @@ const AboutTab = (
   );
 };
 
+const JobApplicationModal = (isVisible: boolean, setIsVisible: any) => {
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={() => setIsVisible(false)}
+    >
+      <View>
+        <Pressable onPressOut={() => setIsVisible(false)}>
+          <View style={styles.modalContent}>
+          <JobApplication />
+          </View>
+        </Pressable>
+      </View>
+    </Modal>
+  );
+};
+
 const JobAppliationsTab = () => {
   // TODO: api sync
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <ScrollView>
       <Text>Job applications</Text>
+      {JobApplicationModal(modalVisible, setModalVisible)}
+      <Button title="create" onPress={() => setModalVisible(true)} />
     </ScrollView>
   );
 };
@@ -169,6 +195,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "bold",
     color: "grey",
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
 
