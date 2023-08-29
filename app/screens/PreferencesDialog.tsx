@@ -91,11 +91,33 @@ const PreferenceDialog: React.FC = () => {
         setExperienceLevelItems(results);
       }
 
+      const fetchPresetPreferences = async () => {
+        try {
+          const token = await AsyncStorage.getItem("authToken");
+          if (token) {
+            const accessToken = JSON.parse(token).access_token;
+    
+            const response = await get("/user", {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            });  
+            console.log(response.data.preference);
+            setSelectedIndustries(response.data.preference.industry);
+            setSelectedJobLocations(response.data.preference.job_location);
+            setSelectedJobTypes(response.data.job_type);
+            setSelectedExpereinceLevels(response.data.experience_level);
+          }
+        } catch (error) {
+          console.error("Error fetching preferences:", error);
+        }
+      };
 
     fetchIndustryData();
     fetchJobLocationData();
     fetchJobTypeData();
     fetchExperienceLevelData();
+    fetchPresetPreferences();
 
     }, []);
 
