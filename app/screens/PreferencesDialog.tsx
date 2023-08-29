@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { get, post, put } from "../axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 interface DropDownSchema {
@@ -98,9 +99,33 @@ const PreferenceDialog: React.FC = () => {
 
     }, []);
 
-  const savePreferences = () => {
+  const savePreferences = async () => {
     // Logic to save preferences
     // You can send preferences to the server or store them locally
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (token) {
+        const accessToken = JSON.parse(token).access_token;
+
+        await put(
+          "/preferences/update",  
+          {
+            industry: selectedIndustries,
+            job_location: selectedJobLocations,
+            job_type: selectedJobTypes,
+            experience_level: selectedExperienceLevels
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+          );
+  
+      }
+    } catch (error) {
+      console.error("Error updating education:", error);
+    }
   };
 
   const cancel = () => {
