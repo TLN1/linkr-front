@@ -441,9 +441,12 @@ const UserProfile = ({ navigation}: Props) => {
         onRequestClose={() => setIsPreferenceModalVisible(false)}
       >
         {/* Render your PreferenceDialog component here */}
-        <View style={styles.modalContainer}>
-          <PreferenceDialog onClose={() => setIsPreferenceModalVisible(false)} />
-        </View>
+
+        <Pressable onPressOut={() => setIsPreferenceModalVisible(false)}>
+          <View style={styles.modalContainer}>
+          <PreferenceDialog />
+          </View>
+        </Pressable>
       </Modal>
     </ScrollView>
   );

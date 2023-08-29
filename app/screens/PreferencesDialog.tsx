@@ -8,61 +8,26 @@ interface DropDownSchema {
     label: string;
     value: string;
 }
-
-enum Industry {
-  SOFTWARE_ENGINEERING = "Software Engineering",
-  // Add more industries here
-}
-
-enum JobLocation {
-  ON_SITE = "on-site",
-  REMOTE = "remote",
-}
-
-enum JobType {
-  PART_TIME = "part-time",
-  FULL_TIME = "full-time",
-}
-
-enum ExperienceLevel {
-  INTERN = "intern",
-  JUNIOR = "junior",
-  MIDDLE = "middle",
-  SENIOR = "senior",
-  LEAD = "lead",
-}
-
-interface Preference {
-  industry: Industry[];
-  job_location: JobLocation[];
-  job_type: JobType[];
-  experience_level: ExperienceLevel[];
-}
-
 const PreferenceDialog: React.FC = () => {
-  const [preferences, setPreferences] = useState<Preference>({
-    industry: [],
-    job_location: [],
-    job_type: [],
-    experience_level: [],
-  });
-  
 
   const [industryOpen, setIndustryOpen] = useState(false);
-  const [industry, setIndustry] = useState<Industry[]>([]); // Make sure to match the type
   const [industryItems, setIndustryItems] = useState([]);
+  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
 
   const [jobLocationOpen, setJobLocationOpen] = useState(false);
-  const [jobLocation, setJobLocation] = useState<JobLocation[]>([]); // Make sure to match the type
+  const [jobLocation, setJobLocation] = useState([]); // Make sure to match the type
   const [jobLocationItems, setJobLocationItems] = useState([]);
+  const [selectedJobLocations, setSelectedJobLocations] = useState<string[]>([]);
 
   const [jobTypeOpen, setJobTypeOpen] = useState(false);
-  const [jobType, setJobType] = useState<JobType[]>([]);
+  const [jobType, setJobType] = useState([]);
   const [jobTypeItems, setJobTypeItems] = useState([]);
+  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
 
   const [experienceLevelOpen, setExperienceLevelOpen] = useState(false);
-  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel[]>([]);
+  const [experienceLevel, setExperienceLevel] = useState([]);
   const [experienceLevelItems, setExperienceLevelItems] = useState([]);
+  const [selectedExperienceLevels, setSelectedExpereinceLevels] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchIndustryData() {
@@ -135,7 +100,6 @@ const PreferenceDialog: React.FC = () => {
 
   const savePreferences = () => {
     // Logic to save preferences
-    console.log('Saved preferences:', preferences);
     // You can send preferences to the server or store them locally
   };
 
@@ -153,11 +117,14 @@ const PreferenceDialog: React.FC = () => {
         style={styles.dropdownone}
         containerStyle={styles.dropdownContainerStyleOne}
         open={industryOpen}
-        value={industry}
+        value={selectedIndustries}
         items={industryItems}
-        setOpen={setIndustryOpen}
-        setValue={setIndustry}
-        placeholder="Select industry"
+        multiple={true} 
+        min={0} 
+        max={industryItems.length} 
+        setOpen={setIndustryOpen} 
+        setValue={setSelectedIndustries}
+        placeholder="Select industries"
       />
 
       <Text>Select Job Location:</Text>
@@ -166,10 +133,13 @@ const PreferenceDialog: React.FC = () => {
         style={styles.dropdowntwo}
         containerStyle={styles.dropdownContainerStyleTwo}
         open={jobLocationOpen}
-        value={jobLocation}
+        value={selectedJobLocations}
         items={jobLocationItems}
+        multiple={true} 
+        min={0} 
+        max={jobLocationItems.length} 
         setOpen={setJobLocationOpen}
-        setValue={setJobLocation}
+        setValue={setSelectedJobLocations}
         placeholder="Select Job Location"
       />
       
@@ -179,24 +149,30 @@ const PreferenceDialog: React.FC = () => {
         style={styles.dropdownone}
         containerStyle={styles.dropdownContainerStyleThree}
         open={jobTypeOpen}
-        value={jobType}
+        value={selectedJobTypes}
         items={jobTypeItems}
+        multiple={true} 
+        min={0} 
+        max={jobTypeItems.length} 
         setOpen={setJobTypeOpen}
-        setValue={setJobType}
+        setValue={setSelectedJobTypes}
         placeholder="Select Job Type"
       />
       
       <Text>Select Experience Level:</Text>
       
       <DropDownPicker
-            style={styles.dropdownone}
-            containerStyle={styles.dropdownContainerStyleFour}
-            open={experienceLevelOpen}
-            value={experienceLevel}
-            items={experienceLevelItems}
-            setOpen={setExperienceLevelOpen}
-            setValue={setExperienceLevel}
-            placeholder="Select Experience Level"
+        style={styles.dropdownone}
+        containerStyle={styles.dropdownContainerStyleFour}
+        open={experienceLevelOpen}
+        value={selectedExperienceLevels}
+        items={experienceLevelItems}
+        multiple={true} 
+        min={0} 
+        max={experienceLevelItems.length} 
+        setOpen={setExperienceLevelOpen}
+        setValue={setSelectedExpereinceLevels}
+        placeholder="Select Experience Level"
         />
         <Button title="Save" onPress={savePreferences} color="black" style={styles.saveButton} />
         <View style={styles.buttonSeparator} />
