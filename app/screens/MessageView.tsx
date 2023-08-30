@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View } from "react-native";
 
 import ChatHeader from "../components/chat/ChatHeader";
+import Messages from "../components/chat/Messages";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 interface MessagesViewProps {
@@ -16,6 +17,7 @@ const MessagesView = ({ navigation } : MessagesViewProps) => {
       <ChatHeader
         username={username}
       />
+      <Messages />
     </View>
   );
 };
