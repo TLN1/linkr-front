@@ -7,6 +7,7 @@ import AccountNavigator from "./AccountNavigator";
 import { StyleSheet } from "react-native";
 import { Color } from "../Constants";
 import UserProfile from "../screens/UserProfile";
+import MessagesView from "../screens/MessageView";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -35,6 +36,9 @@ export default function MainNavigator() {
           options={{ tabBarIcon: "User Profile" }}
           component={UserProfile}
         />
+        <Tab.Screen name="Chat" component={MessagesView} />
+
+
       </Tab.Navigator>
     </AuthProvider>
   );
