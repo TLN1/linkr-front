@@ -54,25 +54,21 @@ const JobApplicationModal = (isVisible: boolean, setIsVisible: any) => {
       onRequestClose={() => setIsVisible(false)}
     >
       <View>
-        <Pressable onPressOut={() => setIsVisible(false)}>
           <View style={styles.modalContent}>
           <JobApplication />
           </View>
-        </Pressable>
       </View>
     </Modal>
   );
 };
 
-const JobAppliationsTab = () => {
-  // TODO: api sync
-  const [modalVisible, setModalVisible] = useState(false);
+const JobAppliationsTab = (isVisible: boolean, setIsVisible: any) => {
 
   return (
+    
     <ScrollView>
       <Text>Job applications</Text>
-      {JobApplicationModal(modalVisible, setModalVisible)}
-      <Button title="create" onPress={() => setModalVisible(true)} />
+      <Button title="create" onPress={() => setIsVisible(true)} />
     </ScrollView>
   );
 };
@@ -99,8 +95,10 @@ const CompanyView = ({ id, navigation }: Props) => {
   const [website, setWebsite] = useState("");
   const [industry, setIndustry] = useState("");
   const [organizationSize, setOrganizationSize] = useState("");
-  const [image, setImage] = useState("");
-  const [coverImage, setCoverImage] = useState("");
+  const [image, setImage] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
 
   const [tabViewIndex, setTabViewIndex] = useState(0);
   const routes = [
@@ -110,6 +108,7 @@ const CompanyView = ({ id, navigation }: Props) => {
 
   return (
     <View style={{ backgroundColor: "white" }}>
+      {JobApplicationModal(modalVisible, setModalVisible)}
       <View
         style={{
           width: "100%",
@@ -152,7 +151,7 @@ const CompanyView = ({ id, navigation }: Props) => {
           navigationState={{ index: tabViewIndex, routes: routes }}
           renderScene={SceneMap({
             about: () => AboutTab(website, industry, organizationSize),
-            jobApplications: JobAppliationsTab,
+            jobApplications: () => JobAppliationsTab(modalVisible, setModalVisible),
           })}
           onIndexChange={(index) => setTabViewIndex(index)}
           initialLayout={{ width: Dimensions.get("window").width }}
@@ -201,6 +200,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+    height: Dimensions.get("window").height,
   },
 });
 
