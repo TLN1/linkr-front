@@ -33,10 +33,13 @@
     "react-native-screens": "~3.20.0",
     "react-native-tab-view": "^3.5.2",
     "react-native-tag-input": "^0.0.21",
+    "react-native-tags-input": "^1.0.10",
     "react-native-vector-icons": "^9.2.0",
     "react-native-web": "~0.18.10",
     "react-navigation-material-bottom-tabs": "^2.3.5",
-    "react-style-proptype": "^3.2.2"
+    "react-style-proptype": "^3.2.2",
+    "react-tagsinput": "^3.20.3",
+    "expo-checkbox": "~2.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
