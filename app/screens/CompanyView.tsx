@@ -10,10 +10,12 @@ import {
   StyleSheet,
   Modal,
   Button,
+  FlatList,
 } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { get, post, put } from "../axios";
 import JobApplication from "../components/JobApplication";
+import { JobApplicationListItem } from "../components/JobApplicationListItem";
 
 interface Props {
   id: number;
@@ -122,21 +124,38 @@ const updateJobApp = async (
   });
 };
 
+interface Application {
+  id: number;
+  title: string;
+  location: string;
+  job_type: string;
+  experienceLevel: string;
+  skills: string[];
+  description: string;
+}
+
 const JobAppliationsTab = (
+  applications: Application[],
   isAddVisible: boolean,
   setIsAddVisible: any,
   isUpdateVisible: boolean,
   setIsUpdateVisible: any
 ) => {
+  console.log("ASDAD");
+  console.log(applications);
   return (
-    <ScrollView>
-      <Text>Job applications</Text>
-      <Button title="update" onPress={() => setIsUpdateVisible(true)} />
-      <Button title="create" onPress={() => setIsAddVisible(true)} />
-    </ScrollView>
+    <View>
+      <FlatList
+        data={applications}
+        renderItem={(application) => JobApplicationListItem(application)}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    </View>
   );
 };
-
+/** <View>
+      {applications?.map((application) => JobApplicationListItem(application))}
+      </View> */
 const CompanyView = ({ id, navigation }: Props) => {
   useEffect(() => {
     async function fetchCompanyData(id: number) {
@@ -150,6 +169,8 @@ const CompanyView = ({ id, navigation }: Props) => {
       setOrganizationSize(data?.organization_size);
       setImage(data?.image_uri);
       setCoverImage(data?.cover_image_uri);
+      setApplications(data?.applications);
+      console.log(applications);
     }
 
     if (id) fetchCompanyData(id);
@@ -163,6 +184,8 @@ const CompanyView = ({ id, navigation }: Props) => {
   const [coverImage, setCoverImage] = useState(null);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
+
+  const [applications, setApplications] = useState([]);
 
   const [tabViewIndex, setTabViewIndex] = useState(0);
   const routes = [
@@ -232,6 +255,7 @@ const CompanyView = ({ id, navigation }: Props) => {
             about: () => AboutTab(website, industry, organizationSize),
             jobApplications: () =>
               JobAppliationsTab(
+                applications,
                 addModalVisible,
                 setAddModalVisible,
                 updateModalVisible,

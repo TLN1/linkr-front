@@ -103,8 +103,6 @@ export const JobApplication = (
       if (data?.job_type) {
         const type = data?.job_type;
         setJobType(type);
-        console.log("AKASFJSA");
-        console.log(type);
         if (type === "part-time") {
           setPartTimeChecked(true);
         } else if (type === "full-time") {
