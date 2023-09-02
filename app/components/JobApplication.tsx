@@ -11,36 +11,45 @@ import {
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import TagInput from "react-native-tags-input";
+import { get } from "../axios";
+import DropDownPicker from "react-native-dropdown-picker";
 
 export const JobApplication = (
-  jobTitle: string,
-  jobExperienceLevel: string,
-  type: string,
-  location: string,
-  jobDescription: string,
-  neededSkills: string[]
+  company_id: number,
+  application_id: number | null,
+  action: (
+    id: number,
+    title: string,
+    experienceLevel: string,
+    type: string,
+    location: string,
+    skills: string[],
+    description: string
+  ) => void
 ) => {
   const [onSiteChecked, setOnSiteChecked] = useState(false);
   const [remoteChecked, setRemoteChecked] = useState(false);
   const [hybridChecked, setHybridChecked] = useState(false);
-  const [jobLocation, setJobLocation] = useState(location);
+  const [jobLocation, setJobLocation] = useState("");
 
   const [fullTimeChecked, setFullTimeChecked] = useState(false);
   const [partTimeChecked, setPartTimeChecked] = useState(false);
-  const [jobType, setJobType] = useState(type);
+  const [jobType, setJobType] = useState("");
 
-  const [experienceLevel, setExperienceLevel] = useState(jobExperienceLevel);
+  const [experienceLevel, setExperienceLevel] = useState("");
+  const [experienceLevelOpen, setExperienceLevelOpen] = useState(false);
+  const [experienceLevels, setExperienceLevels] = useState([]);
 
   const [tagPickerState, setTagPickerState] = useState({
     tags: {
       tag: "",
-      tagsArray: neededSkills ? neededSkills : [],
+      tagsArray: [],
     },
   });
 
-  const [description, setDescription] = useState(jobDescription);
+  const [description, setDescription] = useState("");
 
-  const [title, setTitle] = useState(jobTitle);
+  const [title, setTitle] = useState("");
   interface TagState {
     tag: string;
     tagsArray: string[];
@@ -61,23 +70,59 @@ export const JobApplication = (
   const [skills, setSkills] = useState([]);
 
   useEffect(() => {
-    if (location) {
-      if (location === "on-site") {
-        setOnSiteChecked(true);
-      } else if (location === "remote") {
-        setRemoteChecked(true);
-      } else if (location === "hybrid") {
-        setHybridChecked(true);
-      }
+    async function fetchExperienceLevels() {
+      // Fetch data
+      const { data } = await get("/experience-level");
+      const results: DropDownSchema[] = [];
+      // Store results in the results array
+      data.forEach((i: string) => {
+        results.push({
+          label: i,
+          value: i,
+        });
+      });
+      // Update the options state
+      setExperienceLevels(results);
     }
 
-    if (type) {
-      if (type === "part-time") {
-        setPartTimeChecked(true);
-      } else if (type === "full-time") {
-        setFullTimeChecked(true);
+    async function fetchApplication(application_id: number) {
+      // Fetch data
+      const { data } = await get(`/application/${application_id}`);
+      if (data?.location) {
+        const location = data?.location;
+        setJobLocation(location);
+        if (location === "on-site") {
+          setOnSiteChecked(true);
+        } else if (location === "remote") {
+          setRemoteChecked(true);
+        } else if (location === "hybrid") {
+          setHybridChecked(true);
+        }
       }
+
+      if (data?.job_type) {
+        const type = data?.job_type;
+        setJobType(type);
+        console.log("AKASFJSA");
+        console.log(type);
+        if (type === "part-time") {
+          setPartTimeChecked(true);
+        } else if (type === "full-time") {
+          setFullTimeChecked(true);
+        }
+      }
+
+      setTitle(data?.title);
+      setExperienceLevel(data?.experience_level);
+      updateTagPickerState({
+        tag: "",
+        tagsArray: data?.skills ? data?.skills : [],
+      });
+      setDescription(data?.description);
     }
+
+    fetchExperienceLevels();
+    if (application_id) fetchApplication(application_id);
   }, []);
 
   return (
@@ -91,6 +136,7 @@ export const JobApplication = (
           </View>
 
           <ScrollView>
+            <Text style={{ fontSize: 15, padding: 8 }}>Job title:</Text>
             <TextInput
               style={styles.input}
               value={title}
@@ -98,11 +144,19 @@ export const JobApplication = (
               placeholder="Enter position title"
             />
 
-            <TextInput
-              style={styles.input}
+            <Text style={{ fontSize: 15, padding: 8 }}>Experience level:</Text>
+            <DropDownPicker
+              style={styles.dropdown}
+              containerStyle={styles.dropdownContainerStyle}
+              open={experienceLevelOpen}
               value={experienceLevel}
-              onChangeText={(text) => setExperienceLevel(text)}
-              placeholder="Enter experience level"
+              items={experienceLevels}
+              listMode="SCROLLVIEW"
+              setOpen={setExperienceLevelOpen}
+              setValue={setExperienceLevel}
+              placeholder="Select experience level"
+              dropDownContainerStyle={styles.dropdownListContainerStyle}
+              //   setItems={setIndustryItems}
             />
 
             <Text style={{ fontSize: 15, padding: 8 }}>Job location:</Text>
@@ -207,7 +261,29 @@ export const JobApplication = (
               />
             </View>
 
-            <Button title="Save" color="black" />
+            <Button
+              title="Save"
+              color="black"
+              onPress={() => {
+                console.log(company_id);
+                console.log(title);
+                console.log(experienceLevel);
+                console.log(jobType);
+                console.log(jobLocation);
+                console.log(description);
+                console.log(tagPickerState.tags.tagsArray);
+
+                action(
+                  application_id ? application_id : company_id,
+                  title,
+                  experienceLevel,
+                  jobType,
+                  jobLocation,
+                  tagPickerState.tags.tagsArray,
+                  description
+                );
+              }}
+            />
           </ScrollView>
         </View>
       </View>
@@ -247,22 +323,6 @@ export const styles = StyleSheet.create({
     padding: 20,
     elevation: 5,
     width: 300,
-  },
-  dropdown: {
-    backgroundColor: "#fff",
-    borderColor: "#bbb",
-    marginBottom: 15,
-    shadowColor: "#000000",
-  },
-  dropdownContainerStyle: {
-    // zIndex: 2,
-    marginTop: 10,
-    marginBottom: 10,
-    borderColor: "#bbb",
-    borderRadius: 5,
-    position: "relative",
-    alignItems: "center",
-    justifyContent: "center",
   },
   tagPickerContainer: {
     flex: 1,
@@ -392,6 +452,32 @@ export const styles = StyleSheet.create({
   errorTextStyleoe: {
     color: "#FF0000",
     marginBottom: 10,
+  },
+  dropdown: {
+    padding: 10,
+    margin: 8,
+    backgroundColor: "#fff",
+    borderColor: "#bbb",
+    shadowColor: "#000000",
+  },
+  dropdownContainerStyle: {
+    zIndex: 2,
+    borderColor: "#bbb",
+    borderEndColor: "#bbb",
+    borderTopColor: "#bbb",
+    borderRightColor: "#bbb",
+    borderLeftColor: "#bbb",
+    borderStartColor: "#bbb",
+    borderBottomColor: "#bbb",
+    borderRadius: 5,
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 8,
+  },
+  dropdownListContainerStyle: {
+    borderColor: "#bbb",
+    margin: 10,
   },
 });
 

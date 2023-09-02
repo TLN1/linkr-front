@@ -12,7 +12,7 @@ import {
   Button,
 } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
-import { get } from "../axios";
+import { get, post, put } from "../axios";
 import JobApplication from "../components/JobApplication";
 
 interface Props {
@@ -45,7 +45,21 @@ const AboutTab = (
   );
 };
 
-const JobApplicationModal = (isVisible: boolean, setIsVisible: any) => {
+const displayJobApplicationModal = (
+  isVisible: boolean,
+  setIsVisible: any,
+  companyId: number,
+  applicationId: number | null,
+  action: (
+    id: number,
+    title: string,
+    experienceLevel: string,
+    type: string,
+    location: string,
+    skills: string[],
+    description: string
+  ) => void
+) => {
   return (
     <Modal
       animationType="slide"
@@ -54,21 +68,71 @@ const JobApplicationModal = (isVisible: boolean, setIsVisible: any) => {
       onRequestClose={() => setIsVisible(false)}
     >
       <View>
-          <View style={styles.modalContent}>
-          <JobApplication />
-          </View>
+        <View style={styles.modalContent}>
+          {JobApplication(companyId, applicationId, action)}
+        </View>
       </View>
     </Modal>
   );
 };
 
-const JobAppliationsTab = (isVisible: boolean, setIsVisible: any) => {
+const saveJobApp = async (
+  companyId: number,
+  title: string,
+  experienceLevel: string,
+  type: string,
+  location: string,
+  skills: string[],
+  description: string
+) => {
+  await post("/application", {
+    title: title,
+    experience_level: experienceLevel,
+    job_type: type,
+    location: location,
+    skills: skills,
+    description: description,
+    company_id: companyId,
+  }).then((res) => {
+    console.log(res);
+    // navigate
+  });
+};
 
+const updateJobApp = async (
+  applicationId: number,
+  title: string,
+  experienceLevel: string,
+  type: string,
+  location: string,
+  skills: string[],
+  description: string
+) => {
+  await put(`/application/${applicationId}/update`, {
+    id: applicationId,
+    title: title,
+    experience_level: experienceLevel,
+    job_type: type,
+    location: location,
+    skills: skills,
+    description: description,
+  }).then((res) => {
+    console.log(res);
+    // navigate
+  });
+};
+
+const JobAppliationsTab = (
+  isAddVisible: boolean,
+  setIsAddVisible: any,
+  isUpdateVisible: boolean,
+  setIsUpdateVisible: any
+) => {
   return (
-    
     <ScrollView>
       <Text>Job applications</Text>
-      <Button title="create" onPress={() => setIsVisible(true)} />
+      <Button title="update" onPress={() => setIsUpdateVisible(true)} />
+      <Button title="create" onPress={() => setIsAddVisible(true)} />
     </ScrollView>
   );
 };
@@ -97,8 +161,8 @@ const CompanyView = ({ id, navigation }: Props) => {
   const [organizationSize, setOrganizationSize] = useState("");
   const [image, setImage] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
 
   const [tabViewIndex, setTabViewIndex] = useState(0);
   const routes = [
@@ -106,9 +170,24 @@ const CompanyView = ({ id, navigation }: Props) => {
     { key: "jobApplications", title: "Job Applications" },
   ];
 
+  const [updateApplicationId, setApplicationId] = useState<number | null>(null);
+
   return (
     <View style={{ backgroundColor: "white" }}>
-      {JobApplicationModal(modalVisible, setModalVisible)}
+      {displayJobApplicationModal(
+        addModalVisible,
+        setAddModalVisible,
+        id,
+        updateApplicationId,
+        saveJobApp
+      )}
+      {displayJobApplicationModal(
+        updateModalVisible,
+        setUpdateModalVisible,
+        id,
+        1,
+        updateJobApp
+      )}
       <View
         style={{
           width: "100%",
@@ -151,7 +230,13 @@ const CompanyView = ({ id, navigation }: Props) => {
           navigationState={{ index: tabViewIndex, routes: routes }}
           renderScene={SceneMap({
             about: () => AboutTab(website, industry, organizationSize),
-            jobApplications: () => JobAppliationsTab(modalVisible, setModalVisible),
+            jobApplications: () =>
+              JobAppliationsTab(
+                addModalVisible,
+                setAddModalVisible,
+                updateModalVisible,
+                setUpdateModalVisible
+              ),
           })}
           onIndexChange={(index) => setTabViewIndex(index)}
           initialLayout={{ width: Dimensions.get("window").width }}
