@@ -1,9 +1,8 @@
-import Home from "../screens/Home";
-import { getAuthToken } from "../context/Auth";
+import HomeNavigator from "../screens/Home";
 import AuthProvider from "../context/Auth";
-import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import AccountNavigator from "./AccountNavigator";
-
+import { getAuthToken } from "../context/Auth";
+import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { StyleSheet } from "react-native";
 import { Color } from "../Constants";
 
@@ -20,13 +19,13 @@ export default function MainNavigator() {
         barStyle={styles.barStyle}
       >
         <Tab.Screen
-          name="Home"
-          options={{ tabBarIcon: "home" }}
-          component={Home}
+          name="HomeNavigator"
+          options={{ tabBarIcon: "home", tabBarLabel: "Home" }}
+          component={HomeNavigator}
         />
         <Tab.Screen
-          name="Account"
-          options={{ tabBarIcon: "account" }}
+          name="AccountNavigator"
+          options={{ tabBarIcon: "account", tabBarLabel: "Account" }}
           component={AccountNavigator}
         />
       </Tab.Navigator>

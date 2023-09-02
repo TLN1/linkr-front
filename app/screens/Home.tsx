@@ -1,12 +1,15 @@
-import { View, Text } from "react-native";
-import { global } from "../styles/global";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-const Home = () => {
+const Stack = createNativeStackNavigator();
+
+function Home() {
+  return <></>;
+}
+
+export default function HomeNavigator() {
   return (
-    <View style={global.container}>
-      <Text>Home</Text>
-    </View>
+    <Stack.Navigator>
+      <Stack.Screen name="Home" component={Home} />
+    </Stack.Navigator>
   );
-};
-
-export default Home;
+}
