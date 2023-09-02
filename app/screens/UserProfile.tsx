@@ -12,9 +12,12 @@ import {
   Button,
   TextInput,
   TouchableOpacity,
+  DefaultSectionT,
+  SectionListProps
 } from "react-native";
 import { get, post, put } from "../axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import SectionListWrapper from "../components/SectionListWrapper"
 
 interface Education {
   name: string;
@@ -410,9 +413,8 @@ const UserProfile = ({ navigation }: Props) => {
         <Text style={{ fontSize: 30, fontWeight: "bold" }}>{username}</Text>
       </View>
       <View style={{ flexDirection: "row", marginLeft: "4%" }}></View>
-
       {/* SectionList for Education, Skills, and Experience */}
-      <SectionList
+      <SectionListWrapper
         sections={sections}
         keyExtractor={(item, index) => index.toString()}
         renderSectionHeader={({ section }) => (
