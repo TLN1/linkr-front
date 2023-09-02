@@ -11,6 +11,7 @@ import { AuthContext } from "../context/Auth";
 import Spinner from "react-native-loading-spinner-overlay";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import TlnButton from "../components/TlnButton";
+import WebSocketSingleton from "../WebSocketSingleton";
 
 interface NavigationProps {
   navigation: NativeStackNavigationProp<any, "Login">;
@@ -47,7 +48,7 @@ function Helper({ navigation, register }: HelperProps) {
     }
   };
 
-  const submitOnPress = () => {
+  const submitOnPress = async () => {
     console.log(username);
     console.log(password);
 
@@ -56,6 +57,12 @@ function Helper({ navigation, register }: HelperProps) {
     } else {
       authContext.login(username, password);
     }
+    
+    const websocketUrl = `ws://127.0.0.1:8000/register/ws/${username}`;
+    const ws = WebSocketSingleton.getWebSocket(username, websocketUrl);
+    ws.onopen = () => {
+      console.log(`WebSocket connection opened for user ${username}`);
+    };
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -8,12 +8,31 @@ import {
 
 interface ChatInputProps {
   username: string;
+  websocket: WebSocket;
+  setWebsocket: any;
+  messageText: string;
+  setMessageText: any;
+  sendMessage: any;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
   username,
+  websocket,
+  setWebsocket,
+  messageText,
+  setMessageText,
+  sendMessage
 }) => {
-  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    setWebsocket(websocket);
+  }, []);
+
+  // const sendMessage = () => {
+  //   console.log(websocket);
+  //   websocket.send(JSON.stringify({user: username, time: "12:00", text: message, }));
+  // };
+
   
   return (
       <View style={styles.container}>
@@ -22,11 +41,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
             multiline
             placeholder={"..........."}
             style={styles.input}
-            value={message}
-            onChangeText={(text) => setMessage(text)}
+            value={messageText}
+            onChangeText={(text) => setMessageText(text)}
           />
         </View>
-        <TouchableOpacity style={styles.sendButton}>
+        <TouchableOpacity 
+        style={styles.sendButton} 
+        onPress={sendMessage}
+        >
         </TouchableOpacity>
       </View>
   );

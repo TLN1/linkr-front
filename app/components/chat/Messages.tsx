@@ -1,29 +1,34 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ScrollView, View, Text, StyleSheet } from "react-native";
 
-interface MessageItem {
-  user: number;
+export interface MessageItem {
+  user: string,
   time: string;
   text: string;
+} 
+
+interface ChatMessagesProps {
+  me: string,
+  username: string;
+  messageList: MessageItem[];
+
 }
 
-const Messages: React.FC = () => {
+const Messages: React.FC<ChatMessagesProps> = ({me, username, messageList}) => {
   
-  const [messages, setMessages] = useState<MessageItem[]>([
-    {
-      user: 0,
-      time: "17:00",
-      text: "zd",
-    },
-    {
-      user: 1,
-      time: "18:05",
-      text: "zd zd",
-    },
-  ]);
+  const [messages, setMessages] = useState<MessageItem[]>(messageList);
 
-  const user = useRef(0);
+  const [user, setUSer] = useState<String>(me);
   const scrollView = useRef<ScrollView | null>(null);
+
+  useEffect(() => {
+    setUSer(me);
+    setMessages(messageList);
+    console.log(messageList);
+    
+  },
+
+  [messageList])
 
   return (
     <ScrollView
@@ -31,16 +36,16 @@ const Messages: React.FC = () => {
       ref={(ref) => (scrollView.current = ref)}
     >
       {messages.map((message, index) => (
-
+        
         //message component
-        <View style={[message.user !== user.current ? styles.messageContainer : styles.messageContainerMe]}>
+        <View key={index} style={[message.user !== user ? styles.messageContainer : styles.messageContainerMe]}>
           <View style={styles.messageView}>
-            <Text style={[message.user !== user.current ? styles.message : styles.messageMe]}>
+            <Text style={[message.user !== user ? styles.message : styles.messageMe]}>
               {message.text}
             </Text>
           </View>
           <View style={styles.timeView}>
-            <Text style={[message.user !== user.current ? styles.time : styles.timeMe]}>
+            <Text style={[message.user !== user ? styles.time : styles.timeMe]}>
               {message.time}
             </Text>
           </View>
