@@ -6,6 +6,7 @@ import { createMaterialBottomTabNavigator } from "@react-navigation/material-bot
 import { StyleSheet } from "react-native";
 import { Color } from "../Constants";
 import UserProfile from "../screens/UserProfile";
+import React from "react";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -31,7 +32,7 @@ export default function MainNavigator() {
         />
         <Tab.Screen
           name="User Profile"
-          options={{ tabBarIcon: "User Profile" }}
+          options={{ tabBarIcon: "account", tabBarLabel: "Profile" }}
           component={UserProfile}
         />
       </Tab.Navigator>
