@@ -7,31 +7,25 @@ import {
 } from "react-native";
 
 interface ChatInputProps {
-  username: string;
   websocket: WebSocket;
   setWebsocket: any;
-  messageText: string;
   setMessageText: any;
   sendMessage: any;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
-  username,
   websocket,
   setWebsocket,
-  messageText,
   setMessageText,
   sendMessage
 }) => {
 
+  const [message, setMessage] = useState<string>();
+
   useEffect(() => {
+    setMessageText(message);
     setWebsocket(websocket);
   }, []);
-
-  // const sendMessage = () => {
-  //   console.log(websocket);
-  //   websocket.send(JSON.stringify({user: username, time: "12:00", text: message, }));
-  // };
 
   
   return (
@@ -41,8 +35,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
             multiline
             placeholder={"..........."}
             style={styles.input}
-            value={messageText}
-            onChangeText={(text) => setMessageText(text)}
+            value={message}
+            onChangeText={(text) => {
+              setMessage(text);
+              setMessageText(text);
+            }}
           />
         </View>
         <TouchableOpacity 

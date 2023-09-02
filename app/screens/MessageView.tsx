@@ -36,19 +36,17 @@ const MessagesView = ({ navigation }: MessagesViewProps) => {
       setWebsocket(ws);
       ws.addEventListener("message", (event) => {
         const message = JSON.parse(event.data);
-        console.log(message);
         setMessages([...messages, message]);
         console.log(messages);
       });
-      console.log(ws);
     }
     getSocket();
   }, [message, messages]);
 
 
   const sendMessage = () => {
-    setMessage(message);
-    websocket.send(JSON.stringify({user: username, time: "12:00", text: message, }));
+    
+    websocket.send(JSON.stringify({"user": username, "time": "12:00", "text": message }));
     // websocket.onmessage = (e) => { const message = JSON.parse(e.data); setMessages([...messages, message]);
   };
 
@@ -67,9 +65,8 @@ const MessagesView = ({ navigation }: MessagesViewProps) => {
         me={me}
         username={username}
         websocket={websocket}
-        messageText={message}
+        setMessageText={setMessage}
         setWebsocket={setWebsocket}
-        setMessagetext={setMessage}
         sendMessage={sendMessage}
       />
     </View>
