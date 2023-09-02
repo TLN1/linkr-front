@@ -1,13 +1,13 @@
 import { NavigationContainer } from "@react-navigation/native";
 import MainNavigator from "./routes/MainNavigator";
-import { RootSiblingParent } from "react-native-root-siblings";
+import { ToastProvider } from "react-native-toast-notifications";
 
 export default function App() {
   return (
-    <RootSiblingParent>
+    <ToastProvider>
       <NavigationContainer>
         <MainNavigator />
       </NavigationContainer>
-    </RootSiblingParent>
+    </ToastProvider>
   );
 }
