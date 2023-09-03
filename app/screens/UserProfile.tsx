@@ -8,13 +8,14 @@ import {
   Pressable,
   TextInput,
   TouchableOpacity,
-  FlatList,
   Modal,
-  Dimensions
+  Dimensions,
+  SectionList
 } from "react-native";
 import { get, put } from "../axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView } from "react-native-virtualized-view";
 
 interface Education {
   name: string;
@@ -62,6 +63,9 @@ const UserProfile = ({ navigation }: Props) => {
     description: "",
   });
 
+  const [currName, setCurrName] = useState<string>("");
+  const [currDescription, setCurrDescription] = useState<string>("");
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -83,345 +87,353 @@ const UserProfile = ({ navigation }: Props) => {
   }, []);
 
   const updateUser = async () => {
-
+    console.log("ERGEFVKDNSJVBSDJCSLDNCLJDSBCBSDLCS");
     const response = await get(`/user/${username}`);
     const userData = response.data;
 
+    console.log("RECEIVE USER DATA ");
     console.log(userData);
+    
     console.log(response.data?.username);
 
     setEducations(userData.education || []);
-    setExperiences(response.data?.exprenience || []);
-    setSkills(response.data?.skills || []);
-    setUsername(response.data?.username || "");
+    setExperiences(userData.experience || []);
+    setSkills(userData.skills || []);
+    setUsername(userData.username || "");
+    console.log("EXPPPP : " + expreniences);
+    
   };
 
 
-const handleSaveExperience = async () => {
-  setAddingItem("");
+  const handleSaveExperience = async () => {
+    setAddingItem("");
+    newExperience.name = currName;
+    newExperience.description = currDescription;
+    setNewExperience(newExperience);
 
-  const token = await AsyncStorage.getItem("authToken");
-  if (token) {
-    const accessToken = JSON.parse(token).access_token;
+    const token = await AsyncStorage.getItem("authToken");
+    if (token) {
+      const accessToken = JSON.parse(token).access_token;
 
-    await put(
-      "/user/update",
-      {
-        username: username,
-        education: educations,
-        skills: skills,
-        experience: [...expreniences, newExperience],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+      await put(
+        "/user/update",
+        {
+          username: username,
+          education: educations,
+          skills: skills,
+          experience: [...expreniences, newExperience],
         },
-      }
-    );
-  }
-
-  updateUser();
-
-  setNewExperience({ name: "", description: "" }); // Clear the input fields
-
-};
-
-const handleSaveEducation = async () => {
-  setAddingItem("");
-
-  console.log(educations);
-
-  const token = await AsyncStorage.getItem("authToken");
-  if (token) {
-    const accessToken = JSON.parse(token).access_token;
-
-    await put(
-      "/user/update",
-      {
-        username: username,
-        education: [...educations, newEducation],
-        skills: skills,
-        experience: expreniences,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-  }
-
-  updateUser();
-  setNewEducation({ name: "", description: "" }); // Clear the input fields
-
-};
-
-const handleSaveSkill = async () => {
-  setAddingItem("");
-
-  updateUser();
-
-  const token = await AsyncStorage.getItem("authToken");
-  if (token) {
-    const accessToken = JSON.parse(token).access_token;
-
-    await put(
-      "/user/update",
-      {
-        username: username,
-        education: educations,
-        skills: [...skills, newSkill],
-        experience: expreniences,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-  }
-  setNewSkill({ name: "", description: "" });
-
-};
-
-const renderEducationItem = ({ item }: { item: Education }) => (
-  <View style={styles.aboutField}>
-    <Text style={[styles.aboutLine, styles.aboutTitle]}>Institution</Text>
-    <Text style={[styles.aboutLine, styles.aboutValue]}>{item?.name}</Text>
-    <Text style={[styles.aboutLine, styles.aboutTitle]}>Degree</Text>
-    <Text style={[styles.aboutLine, styles.aboutValue]}>
-      {item?.description}
-    </Text>
-  </View>
-);
-
-const renderSkillsItem = ({ item }: { item: Skill }) => (
-  <View style={styles.aboutField}>
-    <Text style={[styles.aboutLine, styles.aboutTitle]}>Name</Text>
-    <Text style={[styles.aboutLine, styles.aboutValue]}>{item?.name}</Text>
-    <Text style={[styles.aboutLine, styles.aboutTitle]}>description</Text>
-    <Text style={[styles.aboutLine, styles.aboutValue]}>
-      {item?.description}
-    </Text>
-  </View>
-);
-
-const renderExperienceItem = ({ item }: { item: Experience }) => (
-  <View style={styles.aboutField}>
-    <Text style={[styles.aboutLine, styles.aboutTitle]}>Title</Text>
-    <Text style={[styles.aboutLine, styles.aboutValue]}>{item?.name}</Text>
-    <Text style={[styles.aboutLine, styles.aboutTitle]}>Company</Text>
-    <Text style={[styles.aboutLine, styles.aboutValue]}>
-      {item?.description}
-    </Text>
-  </View>
-);
-
-const sections: {
-  title: string;
-  data: (Education | Skill | Experience)[];
-  renderItem: ({
-    item,
-  }: {
-    item: Education | Skill | Experience;
-  }) => JSX.Element;
-}[] = [
-    {
-      title: "Education",
-      data: educations,
-      renderItem: renderEducationItem as ({
-        item,
-      }: {
-        item: Education | Skill | Experience;
-      }) => JSX.Element,
-    },
-    {
-      title: "Skill",
-      data: skills,
-      renderItem: renderSkillsItem as ({
-        item,
-      }: {
-        item: Education | Skill | Experience;
-      }) => JSX.Element,
-    },
-    {
-      title: "Experience",
-      data: expreniences,
-      renderItem: renderExperienceItem as ({
-        item,
-      }: {
-        item: Education | Skill | Experience;
-      }) => JSX.Element,
-    },
-  ];
-
-const renderSectionHeader = ({
-  section: { title },
-}: {
-  section: { title: string };
-}) => (
-  <View style={styles.sectionHeader}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    <Pressable
-      style={styles.addButton}
-      onPress={() => {
-        if (title === "Experience") {
-          setAddingItem("Experience");
-        } else if (title === "Education") {
-          setAddingItem("Education");
-        } else if (title === "Skill") {
-          setAddingItem("Skill");
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
-        setDialogVisible(true);
-      }}
-    >
-      <Text style={styles.addButtonLabel}>Add</Text>
-    </Pressable>
-  </View>
-);
+      );
+    }
 
-const AddItemDialog = () => {
-  if (addingItem === "Education") {
-    return (
-      <View style={styles.dialogContainer}>
-        <View style={styles.dialogFrame}>
-          <TextInput
-            placeholder="Degree"
-            value={newEducation.name}
-            onChangeText={(name) =>
-              setNewEducation((prevEducation) => ({
-                ...prevEducation,
-                name,
-              }))
-            }
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Institution"
-            value={newEducation.description}
-            onChangeText={(description) =>
-              setNewEducation((prevEducation) => ({
-                ...prevEducation,
-                description,
-              }))
-            }
-            style={styles.input}
-          />
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSaveEducation}
-          >
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => {
-              setAddingItem("")
-              setDialogVisible(false);
-            }}
-          >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  } else if (addingItem === "Skill") {
-    return (
-      <View style={styles.dialogContainer}>
-        <View style={styles.dialogFrame}>
-          <TextInput
-            placeholder="Skill Name"
-            value={newSkill.name}
-            onChangeText={(name) =>
-              setNewSkill((prevSkill) => ({
-                ...prevSkill,
-                name,
-              }))
-            }
-            style={styles.input}
-          />
+    updateUser();
 
-          <TextInput
-            placeholder="Skill Description"
-            value={newSkill.description}
-            onChangeText={(description) =>
-              setNewSkill((prevSkill) => ({
-                ...prevSkill,
-                description,
-              }))
-            }
-            style={styles.input}
-          />
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSaveSkill}
-          >
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => {
-              setAddingItem("");
-              setDialogVisible(false);
-            }
-            }
-          >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  } else if (addingItem === "Experience") {
-    return (
-      <View style={styles.dialogContainer}>
-        <View style={styles.dialogFrame}>
-          <TextInput
-            placeholder="Experience Name"
-            value={newExperience.name}
-            onChangeText={(name) =>
-              setNewExperience((prevExperience) => ({
-                ...prevExperience,
-                name,
-              }))
-            }
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Experience Company"
-            value={newExperience.description}
-            onChangeText={(description) =>
-              setNewExperience((prevExperience) => ({
-                ...prevExperience,
-                description,
-              }))
-            }
-            style={styles.input}
-          />
-          <TouchableOpacity
-            style={styles.saveButton}
-            onPress={handleSaveExperience}
-          >
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => {
-              setAddingItem("");
-              setDialogVisible(false);
-            }}
-          >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-};
+    setNewExperience({ name: "", description: "" });
+    setCurrName("");
+    setCurrDescription("");
+    setDialogVisible(false);
+  };
 
-return (
-  <SafeAreaView>
-    <View
-      style={{ backgroundColor: "white" }}>
+  const handleSaveEducation = async () => {
+    setAddingItem("");
+    newEducation.name = currName;
+    newEducation.description = currDescription;
+    setNewEducation(newEducation);
+    console.log(newEducation);
+    
+    console.log(currName);
+
+
+    const token = await AsyncStorage.getItem("authToken");
+    if (token) {
+      const accessToken = JSON.parse(token).access_token;
+
+      await put(
+        "/user/update",
+        {
+          username: username,
+          education: [...educations, newEducation],
+          skills: skills,
+          experience: expreniences,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    }
+    updateUser();
+
+    setNewEducation({ name: "", description: "" });
+    setCurrName("");
+    setCurrDescription("");
+    setDialogVisible(false);
+  };
+
+  const handleSaveSkill = async () => {
+    setAddingItem("");
+    newSkill.name = currName;
+    newSkill.description = currDescription;
+    setNewSkill(newSkill);
+
+    const token = await AsyncStorage.getItem("authToken");
+    if (token) {
+      const accessToken = JSON.parse(token).access_token;
+
+      await put(
+        "/user/update",
+        {
+          username: username,
+          education: educations,
+          skills: [...skills, newSkill],
+          experience: expreniences,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    }
+
+    updateUser();
+
+    setNewSkill({ name: "", description: "" });
+    setCurrName("");
+    setCurrDescription("");
+    setDialogVisible(false);
+
+  };
+
+  const renderEducationItem = ({ item }: { item: Education }) => (
+    <View style={styles.aboutField}>
+      <Text style={[styles.aboutLine, styles.aboutTitle]}>Institution</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>{item?.name}</Text>
+      <Text style={[styles.aboutLine, styles.aboutTitle]}>Degree</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>
+        {item?.description}
+      </Text>
+    </View>
+  );
+
+  const renderSkillsItem = ({ item }: { item: Skill }) => (
+    <View style={styles.aboutField}>
+      <Text style={[styles.aboutLine, styles.aboutTitle]}>Name</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>{item?.name}</Text>
+      <Text style={[styles.aboutLine, styles.aboutTitle]}>description</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>
+        {item?.description}
+      </Text>
+    </View>
+  );
+
+  const renderExperienceItem = ({ item }: { item: Experience }) => (
+    <View style={styles.aboutField}>
+      <Text style={[styles.aboutLine, styles.aboutTitle]}>Title</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>{item?.name}</Text>
+      <Text style={[styles.aboutLine, styles.aboutTitle]}>Company</Text>
+      <Text style={[styles.aboutLine, styles.aboutValue]}>
+        {item?.description}
+      </Text>
+    </View>
+  );
+
+  const sections: {
+    title: string;
+    data: (Education | Skill | Experience)[];
+    renderItem: ({
+      item,
+    }: {
+      item: Education | Skill | Experience;
+    }) => JSX.Element;
+  }[] = [
+      {
+        title: "Education",
+        data: educations,
+        renderItem: renderEducationItem as ({
+          item,
+        }: {
+          item: Education | Skill | Experience;
+        }) => JSX.Element,
+      },
+      {
+        title: "Skill",
+        data: skills,
+        renderItem: renderSkillsItem as ({
+          item,
+        }: {
+          item: Education | Skill | Experience;
+        }) => JSX.Element,
+      },
+      {
+        title: "Experience",
+        data: expreniences,
+        renderItem: renderExperienceItem as ({
+          item,
+        }: {
+          item: Education | Skill | Experience;
+        }) => JSX.Element,
+      },
+    ];
+
+  const renderSectionHeader = ({
+    section: { title },
+  }: {
+    section: { title: string };
+  }) => (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <Pressable
+        style={styles.addButton}
+        onPress={() => {
+          if (title === "Experience") {
+            setAddingItem("Experience");
+          } else if (title === "Education") {
+            setAddingItem("Education");
+          } else if (title === "Skill") {
+            setAddingItem("Skill");
+          }
+          setDialogVisible(true);
+        }}
+      >
+        <Text style={styles.addButtonLabel}>Add</Text>
+      </Pressable>
+    </View>
+  );
+
+  const AddItemDialog = () => {
+    if (addingItem === "Education") {
+      return (
+        <View style={styles.dialogContainer}>
+          <View style={styles.dialogFrame}>
+            <TextInput
+              placeholder="Name"
+              value={currName}
+              onChangeText={(name) => {
+                setCurrName(name);
+                console.log(currName);
+              }
+              }
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Description"
+              value={currDescription}
+              onChangeText={(description) =>
+                setCurrDescription(description)
+              }
+              style={styles.input}
+            />
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSaveEducation}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => {
+                setAddingItem("")
+                setDialogVisible(false);
+              }}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    } else if (addingItem === "Skill") {
+      return (
+        <View style={styles.dialogContainer}>
+          <View style={styles.dialogFrame}>
+            <TextInput
+              placeholder="Skill Name"
+              value={currName}
+              onChangeText={(name) =>
+                setCurrName(name)
+              }
+              style={styles.input}
+            />
+
+            <TextInput
+              placeholder="Skill Description"
+              value={currDescription}
+              onChangeText={(description) =>
+                setCurrDescription(description)
+              }
+              style={styles.input}
+            />
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSaveSkill}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => {
+                setAddingItem("");
+                setDialogVisible(false);
+                setCurrName("");
+                setCurrDescription("");
+              }
+              }
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    } else if (addingItem === "Experience") {
+      return (
+        <View style={styles.dialogContainer}>
+          <View style={styles.dialogFrame}>
+            <TextInput
+              placeholder="Experience Name"
+              value={currName}
+              onChangeText={(name) =>
+                setCurrName(name)
+              }
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Experience Description"
+              value={currDescription}
+              onChangeText={(description) =>
+                setCurrDescription(description)
+              }
+              style={styles.input}
+            />
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSaveExperience}
+            >
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => {
+                setAddingItem("");
+                setDialogVisible(false);
+              }}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    }
+  };
+
+  return (
+    <SafeAreaView>
+    <ScrollView style={{ backgroundColor: "white" }}>
       <View
         style={{
           padding: 10,
@@ -439,7 +451,9 @@ return (
           <View></View>
         </Pressable>
       </View>
-      <View style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}>
+      <View
+        style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
+      >
         <Image
           source={require("../assets/icon.png")}
           style={{
@@ -451,42 +465,42 @@ return (
         ></Image>
       </View>
       <View style={{ padding: 10, marginLeft: "4%" }}>
-        <Text style={{ fontSize: 30, fontWeight: "bold" }}>{"username"}</Text>
+        <Text style={{ fontSize: 30, fontWeight: "bold" }}>
+          {"User Name"}
+        </Text>
+      </View>
+      <View style={{ flexDirection: 'row', marginLeft: '4%' }}>
       </View>
 
-      <View style={{ padding: 32 }}>
-        <FlatList
-          data={sections}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View>
-              {item.title && renderSectionHeader({ section: item })}
-              <FlatList
-                data={item.data}
-                keyExtractor={(innerItem, innerIndex) =>
-                  innerIndex.toString()
-                }
-                renderItem={({ sectionItem }) => item.renderItem({ item: sectionItem })}
-              />
-            </View>
-          )}
-        />
-      </View>
-      {addingItem &&
-        <Modal
-          visible={dialogVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setDialogVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <AddItemDialog />
-          </View>
-        </Modal>
-      }
+      {/* SectionList for Education, Skills, and Experience */}
+      <SectionList
+        sections={sections}
+        keyExtractor={(item, index) => index.toString()}
+
+        renderSectionHeader={({ section }) => (
+          <>{renderSectionHeader({ section })}</>
+        )}
+        renderItem={({ item, section }) => (
+          <>
+            {section.data.map((sectionItem) => (
+              <>{section.renderItem({ item: sectionItem })}</>
+            ))}
+          </>
+        )}
+      />
+    </ScrollView>
+    <Modal
+    visible={dialogVisible}
+    animationType="slide"
+    transparent={true}
+    onRequestClose={() => setDialogVisible(false)}
+  >
+    <View style={styles.modalContainer}>
+      <AddItemDialog />
     </View>
+  </Modal>
   </SafeAreaView>
-);
+  );
 };
 
 const styles = StyleSheet.create({
@@ -499,7 +513,8 @@ const styles = StyleSheet.create({
   aboutField: {
     padding: 10,
     backgroundColor: "white",
-    borderWidth: 3,
+    borderWidth: 1,
+    borderColor: "grey",
     borderRadius: 20,
     marginBottom: 20,
   },
@@ -523,10 +538,13 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   addButton: {
+    height: 20,
+    width: 40,
     position: "absolute",
+    alignItems: 'center',
     top: 10,
     right: 10,
-    backgroundColor: "black",
+    backgroundColor: "#5a5a5a",
     borderRadius: 5,
   },
   addButtonLabel: {
