@@ -33,7 +33,9 @@
     "react-native-screens": "~3.20.0",
     "react-native-tab-view": "^3.5.2",
     "react-native-tags-input": "^1.0.10",
+    "react-native-unordered-list": "^1.0.4",
     "react-native-vector-icons": "^9.2.0",
+    "react-native-virtualized-view": "^1.0.0",
     "react-native-web": "~0.18.10",
     "react-navigation-material-bottom-tabs": "^2.3.5",
     "react-style-proptype": "^3.2.2"

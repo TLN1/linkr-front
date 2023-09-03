@@ -13,8 +13,10 @@ import Checkbox from "expo-checkbox";
 import TagInput from "react-native-tags-input";
 import { get } from "../axios";
 import DropDownPicker from "react-native-dropdown-picker";
+import { Ionicons } from "@expo/vector-icons";
 
 export const JobApplication = (
+  setVisible: any,
   company_id: number,
   application_id: number | null,
   action: (
@@ -64,7 +66,6 @@ export const JobApplication = (
     setTagPickerState({
       tags: state,
     });
-    console.log(tagPickerState);
   };
 
   const [skills, setSkills] = useState([]);
@@ -121,16 +122,36 @@ export const JobApplication = (
 
     fetchExperienceLevels();
     if (application_id) fetchApplication(application_id);
-  }, []);
+  }, [application_id]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.dialogContainer}>
         <View style={styles.dialogFrame}>
-          <View style={{ padding: 10, marginLeft: "4%" }}>
-            <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          <View
+            style={{
+              padding: 10,
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={{ padding: 8, fontSize: 20, fontWeight: "bold" }}>
               Add job application
             </Text>
+            <Ionicons.Button
+              name="close"
+              size={24}
+              color="black"
+              backgroundColor="white"
+              style={{
+                alignContent: "center",
+                justifyContent: "center",
+                flex: 1,
+                alignSelf: 'center',
+                paddingEnd: 0
+              }}
+              onPress={() => setVisible(false)}
+            />
           </View>
 
           <ScrollView>
@@ -262,16 +283,8 @@ export const JobApplication = (
             <Button
               title="Save"
               color="black"
-              onPress={() => {
-                console.log(company_id);
-                console.log(title);
-                console.log(experienceLevel);
-                console.log(jobType);
-                console.log(jobLocation);
-                console.log(description);
-                console.log(tagPickerState.tags.tagsArray);
-
-                action(
+              onPress={async () => {
+                await action(
                   application_id ? application_id : company_id,
                   title,
                   experienceLevel,
@@ -279,7 +292,9 @@ export const JobApplication = (
                   jobLocation,
                   tagPickerState.tags.tagsArray,
                   description
-                );
+                ).then(res => {
+                  setVisible(false);
+                });
               }}
             />
           </ScrollView>
