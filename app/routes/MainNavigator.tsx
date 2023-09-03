@@ -5,6 +5,8 @@ import { getAuthToken } from "../context/Auth";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { StyleSheet } from "react-native";
 import { Color } from "../Constants";
+import UserProfile from "../screens/UserProfile";
+import React from "react";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -27,6 +29,11 @@ export default function MainNavigator() {
           name="AccountNavigator"
           options={{ tabBarIcon: "account", tabBarLabel: "Account" }}
           component={AccountNavigator}
+        />
+        <Tab.Screen
+          name="User Profile"
+          options={{ tabBarIcon: "account", tabBarLabel: "Profile" }}
+          component={UserProfile}
         />
       </Tab.Navigator>
     </AuthProvider>

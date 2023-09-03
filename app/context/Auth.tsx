@@ -97,6 +97,7 @@ const AuthProvider = ({ children }: any) => {
         setAuthToken(authToken);
         AsyncStorage.setItem("authToken", JSON.stringify(authToken));
         console.log(authToken);
+        AsyncStorage.setItem("username", username);
       })
       .catch((e) => {})
       .finally(() => setIsLoading(false));
