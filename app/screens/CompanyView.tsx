@@ -1,7 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import {
-  ScrollView,
   Pressable,
   View,
   Image,
@@ -9,13 +8,16 @@ import {
   Dimensions,
   StyleSheet,
   Modal,
-  Button,
   FlatList,
+  ScrollView,
 } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { get, post, put } from "../axios";
 import JobApplication from "../components/JobApplication";
 import { JobApplicationListItem } from "../components/JobApplicationListItem";
+import { Ionicons } from "@expo/vector-icons";
+import { JobApplicationView } from "../components/JobApplicationView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props {
   id: number;
@@ -47,6 +49,27 @@ const AboutTab = (
   );
 };
 
+const displayViewJobApplicaitonModal = (
+  applicationId,
+  isVisible,
+  setModelVisible
+) => {
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={() => setModelVisible(false)}
+    >
+      <View>
+        <View style={styles.modalContent}>
+          {JobApplicationView(applicationId, isVisible, setModelVisible)}
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 const displayJobApplicationModal = (
   isVisible: boolean,
   setIsVisible: any,
@@ -71,7 +94,7 @@ const displayJobApplicationModal = (
     >
       <View>
         <View style={styles.modalContent}>
-          {JobApplication(companyId, applicationId, action)}
+          {JobApplication(setIsVisible, companyId, applicationId, action)}
         </View>
       </View>
     </Modal>
@@ -134,22 +157,58 @@ interface Application {
   description: string;
 }
 
+const renderSectionHeader = ({
+  section: { title },
+}: {
+  section: { title: string };
+}) => (
+  <View>
+    <Text>{title}</Text>
+  </View>
+);
+
 const JobAppliationsTab = (
   applications: Application[],
   isAddVisible: boolean,
   setIsAddVisible: any,
+  setUpdateApplicationId: any,
   isUpdateVisible: boolean,
-  setIsUpdateVisible: any
+  setIsUpdateVisible: any,
+  setViewApplicationId: any,
+  setViewModalVisible: any,
+  myCompany: any
 ) => {
-  console.log("ASDAD");
-  console.log(applications);
   return (
-    <View>
-      <FlatList
-        data={applications}
-        renderItem={(application) => JobApplicationListItem(application)}
-        keyExtractor={(item, index) => index.toString()}
-      />
+    <View style={{ flex: 1 }}>
+      {/* <ScrollView> */}
+      <View style={{ padding: 8 }}>
+        <Ionicons.Button
+          name="add"
+          size={24}
+          color="black"
+          backgroundColor="white"
+          onPress={() => setIsAddVisible(true)}
+        >
+          Add job application
+        </Ionicons.Button>
+      </View>
+      <View style={{ width: "100%", height: "40%" }}>
+        <FlatList
+          data={applications}
+          renderItem={(application) =>
+            JobApplicationListItem(
+              application,
+              setViewApplicationId,
+              setViewModalVisible,
+              setUpdateApplicationId,
+              setIsUpdateVisible,
+              myCompany
+            )
+          }
+          keyExtractor={(item, index) => index.toString()}
+        />
+      </View>
+      {/* </ScrollView> */}
     </View>
   );
 };
@@ -170,7 +229,12 @@ const CompanyView = ({ id, navigation }: Props) => {
       setImage(data?.image_uri);
       setCoverImage(data?.cover_image_uri);
       setApplications(data?.applications);
-      console.log(applications);
+
+      console.log(data?.owner_username);
+      var username = await AsyncStorage.getItem("username");
+      setMyCompany(data?.owner_username == username);
+      console.log(username);
+      console.log(myCompany);
     }
 
     if (id) fetchCompanyData(id);
@@ -193,22 +257,34 @@ const CompanyView = ({ id, navigation }: Props) => {
     { key: "jobApplications", title: "Job Applications" },
   ];
 
-  const [updateApplicationId, setApplicationId] = useState<number | null>(null);
+  const [updateApplicationId, setUpdateApplicationId] = useState<number | null>(
+    null
+  );
+  const [viewApplicationId, setViewApplicationId] = useState<number | null>(
+    null
+  );
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [myCompany, setMyCompany] = useState(false);
 
   return (
     <View style={{ backgroundColor: "white" }}>
+      {displayViewJobApplicaitonModal(
+        viewApplicationId,
+        viewModalVisible,
+        setViewModalVisible
+      )}
       {displayJobApplicationModal(
         addModalVisible,
         setAddModalVisible,
         id,
-        updateApplicationId,
+        null,
         saveJobApp
       )}
       {displayJobApplicationModal(
         updateModalVisible,
         setUpdateModalVisible,
         id,
-        1,
+        updateApplicationId,
         updateJobApp
       )}
       <View
@@ -258,8 +334,12 @@ const CompanyView = ({ id, navigation }: Props) => {
                 applications,
                 addModalVisible,
                 setAddModalVisible,
+                setUpdateApplicationId,
                 updateModalVisible,
-                setUpdateModalVisible
+                setUpdateModalVisible,
+                setViewApplicationId,
+                setViewModalVisible,
+                myCompany
               ),
           })}
           onIndexChange={(index) => setTabViewIndex(index)}
@@ -308,7 +388,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "grey",
     height: Dimensions.get("window").height,
   },
 });
