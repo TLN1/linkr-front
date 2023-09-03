@@ -280,7 +280,7 @@ const CreateCompany = ({ navigation, id }: Props) => {
                     console.log(e);
                   });
               } else {
-                await post("/company/", {
+                await post("/company", {
                   name: name,
                   website: website,
                   industry: industry,
