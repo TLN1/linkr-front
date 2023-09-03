@@ -6,5 +6,5 @@ export const enum Color {
   LIGHT_RED = "#ffd7d8",
 }
 
-export const BASE_URL = "http://192.168.0.117:8000"; // Replace with your ip:port where backend is running
+export const BASE_URL = "http://192.168.0.103:8000"; // Replace with your ip:port where backend is running
 export const AUTH_HEADER = "Authorization";
