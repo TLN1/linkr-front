@@ -16,16 +16,14 @@ interface ChatMessagesProps {
 
 const Messages: React.FC<ChatMessagesProps> = ({me, username, messageList}) => {
   
-  const [messages, setMessages] = useState<MessageItem[]>(messageList);
+  // const [messages, setMessages] = useState<MessageItem[]>(messageList);
 
   const [user, setUSer] = useState<String>(me);
   const scrollView = useRef<ScrollView | null>(null);
 
   useEffect(() => {
     setUSer(me);
-    setMessages(messageList);
     console.log(messageList);
-    
   },
 
   [messageList])
@@ -35,7 +33,7 @@ const Messages: React.FC<ChatMessagesProps> = ({me, username, messageList}) => {
       style={{ backgroundColor: "white", flex: 1 }}
       ref={(ref) => (scrollView.current = ref)}
     >
-      {messages.map((message, index) => (
+      {messageList.map((message: any, index: number) => (
         
         //message component
         <View key={index} style={[message.user !== user ? styles.messageContainer : styles.messageContainerMe]}>

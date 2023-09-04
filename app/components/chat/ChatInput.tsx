@@ -7,15 +7,13 @@ import {
 } from "react-native";
 
 interface ChatInputProps {
-  websocket: WebSocket;
-  setWebsocket: any;
+  // websocket: WebSocket;
+  // setWebsocket: any;
   setMessageText: any;
   sendMessage: any;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
-  websocket,
-  setWebsocket,
   setMessageText,
   sendMessage
 }) => {
@@ -23,8 +21,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const [message, setMessage] = useState<string>();
 
   useEffect(() => {
-    setMessageText(message);
-    setWebsocket(websocket);
   }, []);
 
   
@@ -38,13 +34,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
             value={message}
             onChangeText={(text) => {
               setMessage(text);
-              setMessageText(text);
             }}
           />
         </View>
         <TouchableOpacity 
         style={styles.sendButton} 
-        onPress={sendMessage}
+        onPress={() => {
+          setMessageText(message);
+          sendMessage();
+        }
+        }
         >
         </TouchableOpacity>
       </View>

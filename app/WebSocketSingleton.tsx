@@ -6,14 +6,13 @@ interface WebSocketMap {
 class WebSocketSingleton {
   private myMap = new Map<string, WebSocket>();
 
-  getWebSocket(token: string , url: string): WebSocket {
-    console.log(this.myMap.has(token));
+  getWebSocket(username: string , url: string): WebSocket {
     
-    if (!this.myMap.has(token)) {
-      this.myMap.set(token, new WebSocket(url));
-      console.log(this.myMap.get(token));
+    if (!this.myMap.has(username)) {
+      this.myMap.set(username, new WebSocket(url));
+      console.log(this.myMap.get(username));
     }
-    return this.myMap.get(token);
+    return this.myMap.get(username);
   }
 
   // closeWebSocket(token: string): void {
