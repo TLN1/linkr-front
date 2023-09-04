@@ -10,12 +10,14 @@ import {
   TouchableOpacity,
   Modal,
   Dimensions,
-  SectionList
+  SectionList,
+  Button,
 } from "react-native";
 import { get, put } from "../axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-virtualized-view";
+import logout from "../context/Auth";
 
 interface Education {
   name: string;
@@ -33,14 +35,14 @@ interface Experience {
 }
 
 interface Props {
+  route: any;
   navigation: NativeStackNavigationProp<any, "Profile">;
-  // username: string
 }
-const UserProfile = ({ navigation }: Props) => {
+const UserProfile = ({ route, navigation }: Props) => {
   const [addingItem, setAddingItem] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
 
-  const [username, setUsername] = useState("tamo");
+  const [username, setUsername] = useState(route?.params?.username);
 
   const [expreniences, setExperiences] = useState<Experience[]>([]);
 
@@ -67,9 +69,10 @@ const UserProfile = ({ navigation }: Props) => {
   const [currDescription, setCurrDescription] = useState<string>("");
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserData = async (userName) => {
       try {
-        const response = await get(`/user/${username}`);
+        console.log(userName);
+        const response = await get(`/user/${userName}`);
         const userData = response.data;
 
         console.log(userData);
@@ -78,13 +81,18 @@ const UserProfile = ({ navigation }: Props) => {
         setEducations(userData.education || []);
         setExperiences(response.data?.exprenience || []);
         setSkills(response.data?.skills || []);
+
+        const loggedInUser = await AsyncStorage.getItem("username");
+        setMyUser(loggedInUser === userName);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
 
-    fetchUserData();
-  }, []);
+    if (username) fetchUserData(username);
+  }, [username]);
+
+  const [myUser, setMyUser] = useState(false);
 
   const updateUser = async () => {
     console.log("ERGEFVKDNSJVBSDJCSLDNCLJDSBCBSDLCS");
@@ -93,7 +101,7 @@ const UserProfile = ({ navigation }: Props) => {
 
     console.log("RECEIVE USER DATA ");
     console.log(userData);
-    
+
     console.log(response.data?.username);
 
     setEducations(userData.education || []);
@@ -101,9 +109,7 @@ const UserProfile = ({ navigation }: Props) => {
     setSkills(userData.skills || []);
     setUsername(userData.username || "");
     console.log("EXPPPP : " + expreniences);
-    
   };
-
 
   const handleSaveExperience = async () => {
     setAddingItem("");
@@ -145,9 +151,8 @@ const UserProfile = ({ navigation }: Props) => {
     newEducation.description = currDescription;
     setNewEducation(newEducation);
     console.log(newEducation);
-    
-    console.log(currName);
 
+    console.log(currName);
 
     const token = await AsyncStorage.getItem("authToken");
     if (token) {
@@ -208,7 +213,6 @@ const UserProfile = ({ navigation }: Props) => {
     setCurrName("");
     setCurrDescription("");
     setDialogVisible(false);
-
   };
 
   const renderEducationItem = ({ item }: { item: Education }) => (
@@ -253,34 +257,34 @@ const UserProfile = ({ navigation }: Props) => {
       item: Education | Skill | Experience;
     }) => JSX.Element;
   }[] = [
-      {
-        title: "Education",
-        data: educations,
-        renderItem: renderEducationItem as ({
-          item,
-        }: {
-          item: Education | Skill | Experience;
-        }) => JSX.Element,
-      },
-      {
-        title: "Skill",
-        data: skills,
-        renderItem: renderSkillsItem as ({
-          item,
-        }: {
-          item: Education | Skill | Experience;
-        }) => JSX.Element,
-      },
-      {
-        title: "Experience",
-        data: expreniences,
-        renderItem: renderExperienceItem as ({
-          item,
-        }: {
-          item: Education | Skill | Experience;
-        }) => JSX.Element,
-      },
-    ];
+    {
+      title: "Education",
+      data: educations,
+      renderItem: renderEducationItem as ({
+        item,
+      }: {
+        item: Education | Skill | Experience;
+      }) => JSX.Element,
+    },
+    {
+      title: "Skill",
+      data: skills,
+      renderItem: renderSkillsItem as ({
+        item,
+      }: {
+        item: Education | Skill | Experience;
+      }) => JSX.Element,
+    },
+    {
+      title: "Experience",
+      data: expreniences,
+      renderItem: renderExperienceItem as ({
+        item,
+      }: {
+        item: Education | Skill | Experience;
+      }) => JSX.Element,
+    },
+  ];
 
   const renderSectionHeader = ({
     section: { title },
@@ -318,16 +322,13 @@ const UserProfile = ({ navigation }: Props) => {
               onChangeText={(name) => {
                 setCurrName(name);
                 console.log(currName);
-              }
-              }
+              }}
               style={styles.input}
             />
             <TextInput
               placeholder="Description"
               value={currDescription}
-              onChangeText={(description) =>
-                setCurrDescription(description)
-              }
+              onChangeText={(description) => setCurrDescription(description)}
               style={styles.input}
             />
             <TouchableOpacity
@@ -339,7 +340,7 @@ const UserProfile = ({ navigation }: Props) => {
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => {
-                setAddingItem("")
+                setAddingItem("");
                 setDialogVisible(false);
               }}
             >
@@ -355,18 +356,14 @@ const UserProfile = ({ navigation }: Props) => {
             <TextInput
               placeholder="Skill Name"
               value={currName}
-              onChangeText={(name) =>
-                setCurrName(name)
-              }
+              onChangeText={(name) => setCurrName(name)}
               style={styles.input}
             />
 
             <TextInput
               placeholder="Skill Description"
               value={currDescription}
-              onChangeText={(description) =>
-                setCurrDescription(description)
-              }
+              onChangeText={(description) => setCurrDescription(description)}
               style={styles.input}
             />
             <TouchableOpacity
@@ -382,8 +379,7 @@ const UserProfile = ({ navigation }: Props) => {
                 setDialogVisible(false);
                 setCurrName("");
                 setCurrDescription("");
-              }
-              }
+              }}
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
@@ -397,17 +393,13 @@ const UserProfile = ({ navigation }: Props) => {
             <TextInput
               placeholder="Experience Name"
               value={currName}
-              onChangeText={(name) =>
-                setCurrName(name)
-              }
+              onChangeText={(name) => setCurrName(name)}
               style={styles.input}
             />
             <TextInput
               placeholder="Experience Description"
               value={currDescription}
-              onChangeText={(description) =>
-                setCurrDescription(description)
-              }
+              onChangeText={(description) => setCurrDescription(description)}
               style={styles.input}
             />
             <TouchableOpacity
@@ -433,73 +425,78 @@ const UserProfile = ({ navigation }: Props) => {
 
   return (
     <SafeAreaView>
-    <ScrollView style={{ backgroundColor: "white" }}>
-      <View
-        style={{
-          padding: 10,
-          width: "100%",
-          backgroundColor: "#000",
-          height: 150,
-        }}
-      >
-        <Pressable>
+      <ScrollView style={{ backgroundColor: "white" }}>
+        <View
+          style={{
+            padding: 10,
+            width: "100%",
+            backgroundColor: "#000",
+            height: 150,
+          }}
+        >
+          <Pressable>
+            <Image
+              source={require("../assets/icon.png")}
+              style={{ width: 30, height: 30 }}
+            ></Image>
+            <View></View>
+            <View></View>
+          </Pressable>
+        </View>
+        <View
+          style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
+        >
           <Image
             source={require("../assets/icon.png")}
-            style={{ width: 30, height: 30 }}
+            style={{
+              width: 140,
+              height: 140,
+              borderRadius: 100,
+              marginTop: -70,
+            }}
           ></Image>
-          <View></View>
-          <View></View>
-        </Pressable>
-      </View>
-      <View
-        style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
-      >
-        <Image
-          source={require("../assets/icon.png")}
-          style={{
-            width: 140,
-            height: 140,
-            borderRadius: 100,
-            marginTop: -70,
+        </View>
+        <View style={{ padding: 10, marginLeft: "4%" }}>
+          <Text style={{ fontSize: 30, fontWeight: "bold" }}>{username}</Text>
+        </View>
+        <View style={{ flexDirection: "row", marginLeft: "4%" }}></View>
+
+        {/* SectionList for Education, Skills, and Experience */}
+        <SectionList
+          sections={sections}
+          keyExtractor={(item, index) => index.toString()}
+          renderSectionHeader={({ section }) => (
+            <>{renderSectionHeader({ section })}</>
+          )}
+          renderItem={({ item, section }) => (
+            <>
+              {section.data.map((sectionItem) => (
+                <>{section.renderItem({ item: sectionItem })}</>
+              ))}
+            </>
+          )}
+        />
+        <Button
+          title="Logout"
+          color="red"
+          onPress={() => {
+            logout();
+            // navigation.navigate("Login");
           }}
-        ></Image>
-      </View>
-      <View style={{ padding: 10, marginLeft: "4%" }}>
-        <Text style={{ fontSize: 30, fontWeight: "bold" }}>
-          {"User Name"}
-        </Text>
-      </View>
-      <View style={{ flexDirection: 'row', marginLeft: '4%' }}>
-      </View>
+        />
+      </ScrollView>
 
-      {/* SectionList for Education, Skills, and Experience */}
-      <SectionList
-        sections={sections}
-        keyExtractor={(item, index) => index.toString()}
-
-        renderSectionHeader={({ section }) => (
-          <>{renderSectionHeader({ section })}</>
-        )}
-        renderItem={({ item, section }) => (
-          <>
-            {section.data.map((sectionItem) => (
-              <>{section.renderItem({ item: sectionItem })}</>
-            ))}
-          </>
-        )}
-      />
-    </ScrollView>
-    <Modal
-    visible={dialogVisible}
-    animationType="slide"
-    transparent={true}
-    onRequestClose={() => setDialogVisible(false)}
-  >
-    <View style={styles.modalContainer}>
-      <AddItemDialog />
-    </View>
-  </Modal>
-  </SafeAreaView>
+      <Modal
+        visible={dialogVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setDialogVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <AddItemDialog />
+        </View>
+      </Modal>
+    </SafeAreaView>
   );
 };
 
@@ -541,7 +538,7 @@ const styles = StyleSheet.create({
     height: 20,
     width: 40,
     position: "absolute",
-    alignItems: 'center',
+    alignItems: "center",
     top: 10,
     right: 10,
     backgroundColor: "#5a5a5a",
@@ -560,20 +557,20 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   dialogContainer: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     height: Dimensions.get("window").height,
   },
   dialogFrame: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderWidth: 2,
-    borderColor: 'black',
+    borderColor: "black",
     borderRadius: 10,
     padding: 20,
     elevation: 5,
-    width: 250
+    width: 250,
   },
   input: {
     borderWidth: 1,
