@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Image,
@@ -17,7 +17,7 @@ import { get, put } from "../axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-virtualized-view";
-import logout from "../context/Auth";
+import { AuthContext } from "../context/Auth";
 
 interface Education {
   name: string;
@@ -67,6 +67,7 @@ const UserProfile = ({ route, navigation }: Props) => {
 
   const [currName, setCurrName] = useState<string>("");
   const [currDescription, setCurrDescription] = useState<string>("");
+  const authContext = useContext(AuthContext);
 
   useEffect(() => {
     const fetchUserData = async (userName) => {
@@ -480,8 +481,7 @@ const UserProfile = ({ route, navigation }: Props) => {
           title="Logout"
           color="red"
           onPress={() => {
-            logout();
-            // navigation.navigate("Login");
+            authContext.logout();
           }}
         />
       </ScrollView>

@@ -4,7 +4,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useState } from "react";
 import { BASE_URL } from "../Constants";
 import { post } from "../axios";
-import { connect } from 'react-redux';
+import { useDispatch } from "react-redux";
+import {
+  clearUserInfo,
+  setUserToken,
+  setUsername,
+} from "../actions/AuthActions";
 
 export const AuthContext = createContext<AuthContextType>({
   isLoading: false,
@@ -40,10 +45,12 @@ export const getAuthToken = () => {
   return token;
 };
 
-const AuthProvider = ({ children }: any, {loginInRedux}) => {
+const AuthProvider = ({ children }: any) => {
   const [userInfo, setUserInfo] = useState({} as Account);
   const [authToken, setAuthToken] = useState<AuthToken>({} as AuthToken);
   const [isLoading, setIsLoading] = useState(false);
+
+  const dispatch = useDispatch();
 
   const register = async (username: string, password: string) => {
     setIsLoading(true);
@@ -98,7 +105,8 @@ const AuthProvider = ({ children }: any, {loginInRedux}) => {
         AsyncStorage.setItem("username", username);
         console.log(username);
 
-        loginInRedux(JSON.stringify(authToken),username);
+        dispatch(setUserToken(JSON.stringify(authToken)));
+        dispatch(setUsername(username));
       })
       .catch((e) => {})
       .finally(() => setIsLoading(false));
@@ -108,8 +116,8 @@ const AuthProvider = ({ children }: any, {loginInRedux}) => {
     await AsyncStorage.removeItem("authToken");
     await AsyncStorage.removeItem("userInfo");
     await AsyncStorage.removeItem("username");
-    // dispatch({ type: "SIGN_OUT" });
-  };
+    dispatch(clearUserInfo());
+  };  
 
   return (
     <AuthContext.Provider
@@ -117,7 +125,7 @@ const AuthProvider = ({ children }: any, {loginInRedux}) => {
         isLoading,
         register,
         login,
-        logout,
+        logout
       }}
     >
       {children}
@@ -125,8 +133,4 @@ const AuthProvider = ({ children }: any, {loginInRedux}) => {
   );
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  loginInRedux: (token, username) => dispatch({ type: 'SIGN_IN', token: token, username: username })
-})
-
-export default connect(null, mapDispatchToProps) (AuthProvider);
+export default AuthProvider;

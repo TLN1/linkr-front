@@ -6,22 +6,13 @@ import { StyleSheet } from "react-native";
 import { Color } from "../Constants";
 import UserProfile from "../screens/UserProfile";
 import React, { useEffect, useState } from "react";
-import {connect} from 'react-redux'
+import { useSelector } from 'react-redux';
 
 const Tab = createMaterialBottomTabNavigator();
 
-function MainNavigator(props) {
+function MainNavigator() {
 
-  const [logged, setLogged] = useState(null);
- 
-  useEffect(() => {
-    isLogged()
-  },[props.username])
-  
-  const isLogged = () => {
-    console.log(props.username);
-    setLogged(props.username);
-  }
+  const username = useSelector((state) => state.auth.username);
 
   return (
     <AuthProvider>
@@ -35,12 +26,12 @@ function MainNavigator(props) {
           options={{ tabBarIcon: "home", tabBarLabel: "Home" }}
           component={HomeNavigator}
         />
-        {logged ? (
+        {username ? (
           <Tab.Screen
             name="User Profile"
             options={{ tabBarIcon: "account", tabBarLabel: "Profile" }}
             component={UserProfile}
-            initialParams={{ username: logged }}
+            initialParams={{ username: username }}
           />
         ) : (
           <Tab.Screen
@@ -60,10 +51,5 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapStateToProps = (state) => {
-  return{
-    username: state.userReducer.username
-  }
-} 
 
-export default connect(mapStateToProps, null)(MainNavigator);
+export default MainNavigator;

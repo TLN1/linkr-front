@@ -1,34 +1,31 @@
-export const userReducer = (prevState, action) => {
+import { SET_AUTH_TOKEN, CLEAR_USER_INFO, SET_USERNAME } from "../actions/AuthActions";
+
+const initialState = {
+  username: null,
+  authToken: null,
+};
+
+const authReducer = (state = initialState, action) => {
   switch (action.type) {
-    case "RESTORE_TOKEN":
+    case SET_AUTH_TOKEN:
       return {
-        ...prevState,
-        userToken: action.token,
-        username: action.username,
-        isLoading: false,
+        ...state,
+        authToken: action.payload,
       };
-    case "SIGN_IN":
+    case SET_USERNAME:
       return {
-        ...prevState,
-        isSignout: false,
-        userToken: action.token,
-        username: action.username,
+        ...state,
+        username: action.payload,
       };
-    case "SIGN_OUT":
+    case CLEAR_USER_INFO:
       return {
-        ...prevState,
-        isSignout: true,
-        userToken: null,
+        ...state,
+        authToken: null,
         username: null,
       };
     default:
-      return {
-        isLoading: true,
-        isSignout: false,
-        userToken: null,
-        username: null,
-      };
+      return state;
   }
 };
 
-export default userReducer;
+export default authReducer;
