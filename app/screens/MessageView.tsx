@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View } from "react-native";
 
 import ChatHeader from "../components/chat/ChatHeader";
@@ -18,58 +18,59 @@ interface MessagesViewProps {
 const MessagesView = ({ navigation }: MessagesViewProps) => {
   const [me, setMe] = useState<string>("");
   const [username, setUsername] = useState<string>("");
-  // const [websocket, setWebsocket] = useState<WebSocket>();
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [message, setMessage] = useState<string>("");
+  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     async function getSocket() {
-      const userInfo = await AsyncStorage.getItem("userInfo");
-      const userInfoParsed = JSON.parse(userInfo);
-      console.log(userInfoParsed);
+      AsyncStorage.getItem("userInfo").then((userInfo) => {
+        const userInfoParsed = JSON.parse(userInfo);
+        console.log(userInfoParsed);
 
-      setMe(userInfoParsed.username);
+        setMe(userInfoParsed.username);
 
-      if (userInfoParsed.username === "tamo") {
-        setUsername("nini");
-      } else if (userInfoParsed.username === "nini") {
-        setUsername("tamo");
-      }
-      await get(`/chat/${username}`).then((response) => {
-        console.log(response.data.message_list);
-        const messageList = response.data.message_list;
-        setMessages([]);
-        messageList.map((message: any) => (
-          setMessages((prevMessages) => [...prevMessages, {
-            user: message.sender_username,
-            time: message.time,
-            text: message.text
-          }])
-        ));
+        if (userInfoParsed.username === "tamo") {
+          setUsername("nini");
+        } else if (userInfoParsed.username === "nini") {
+          setUsername("tamo");
+        }
+        console.log(username);
       });
 
-      const websocketUrl = `ws://127.0.0.1:8000/register/ws/${userInfoParsed.username}`;
-      const ws = WebSocketSingleton.getWebSocket(userInfoParsed.username, websocketUrl);
+      if (me) {
+        await get(`/chat/${username}`).then((response) => {
+          console.log(response.data.message_list);
+          const messageList = response.data.message_list;
+          setMessages([]);
+          messageList.map((message: any) => (            
+            setMessages((prevMessages: any) => [...prevMessages, {
+              user: message.sender_username,
+              time: message.time,
+              text: message.text
+            }])
+          ));
+        });
 
-      // setWebsocket(ws);
+        console.log(me);
+        const websocketUrl = `ws://127.0.0.1:8000/register/ws/${me}`;
+        wsRef.current = WebSocketSingleton.getWebSocket(me, websocketUrl);
 
-      ws.onmessage = (e) => {
-        setMessages((prevMessages) => [...prevMessages, JSON.parse(e.data)]);
-        console.log(messages);
-      };
+        wsRef.current.onmessage = (e) => {
+          setMessages((prevMessages) => [...prevMessages, JSON.parse(e.data)]);
+          console.log(messages);
+        };
+      }
 
     }
-
     getSocket();
   }, [message]);
 
-  const websocketUrl = `ws://127.0.0.1:8000/register/ws/${me}`;
-  const ws = WebSocketSingleton.getWebSocket(me, websocketUrl);
-  
+
   const sendMessage = () => {
     console.log("send");
-
-    ws.send(JSON.stringify({ "user": username, "time": "12:00", "text": message }));
+    console.log(username);
+    if (wsRef.current !== null) wsRef.current.send(JSON.stringify({ "user": username, "time": "12:00", "text": message }));
   };
 
 
@@ -80,7 +81,6 @@ const MessagesView = ({ navigation }: MessagesViewProps) => {
       />
       <Messages
         me={me}
-        username={username}
         messageList={messages}
       />
       <ChatInput

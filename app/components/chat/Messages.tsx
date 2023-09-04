@@ -1,22 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ScrollView, View, Text, StyleSheet } from "react-native";
+import { get, post, put } from "../../axios";
 
 export interface MessageItem {
   user: string,
   time: string;
   text: string;
-} 
+}
 
 interface ChatMessagesProps {
   me: string,
-  username: string;
   messageList: MessageItem[];
-
 }
 
-const Messages: React.FC<ChatMessagesProps> = ({me, username, messageList}) => {
-  
-  // const [messages, setMessages] = useState<MessageItem[]>(messageList);
+const Messages: React.FC<ChatMessagesProps> = ({ me, messageList }) => {
 
   const [user, setUSer] = useState<String>(me);
   const scrollView = useRef<ScrollView | null>(null);
@@ -24,9 +21,7 @@ const Messages: React.FC<ChatMessagesProps> = ({me, username, messageList}) => {
   useEffect(() => {
     setUSer(me);
     console.log(messageList);
-  },
-
-  [messageList])
+  }, [messageList])
 
   return (
     <ScrollView
@@ -34,7 +29,7 @@ const Messages: React.FC<ChatMessagesProps> = ({me, username, messageList}) => {
       ref={(ref) => (scrollView.current = ref)}
     >
       {messageList.map((message: any, index: number) => (
-        
+
         //message component
         <View key={index} style={[message.user !== user ? styles.messageContainer : styles.messageContainerMe]}>
           <View style={styles.messageView}>
@@ -48,7 +43,7 @@ const Messages: React.FC<ChatMessagesProps> = ({me, username, messageList}) => {
             </Text>
           </View>
         </View>
-        
+
       ))}
     </ScrollView>
   );

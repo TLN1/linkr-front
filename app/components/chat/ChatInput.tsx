@@ -42,6 +42,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         onPress={() => {
           setMessageText(message);
           sendMessage();
+          setMessage("");
         }
         }
         >
