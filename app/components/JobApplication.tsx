@@ -300,6 +300,17 @@ export const JobApplication = (
                   tagPickerState.tags.tagsArray,
                   description
                 );
+                setTitle("");
+                setExperienceLevel("");
+                setJobType("");
+                setJobLocation("");
+                setDescription("");
+                setTagPickerState({
+                  tags: {
+                    tag: "",
+                    tagsArray: [],
+                  },
+                });
                 setIsLoading(false);
                 // setVisible(false);
                 setRefresh(!refresh);
