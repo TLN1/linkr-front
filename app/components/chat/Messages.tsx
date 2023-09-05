@@ -3,42 +3,38 @@ import { ScrollView, View, Text, StyleSheet } from "react-native";
 import { get, post, put } from "../../axios";
 
 export interface MessageItem {
-  user: string,
+  sender: string;
+  recipient: string;
   time: string;
   text: string;
 }
 
 interface ChatMessagesProps {
-  me: string,
+  me: string;
   messageList: MessageItem[];
 }
 
-const Messages: React.FC<ChatMessagesProps> = ({ me, messageList }) => {
+const Messages = ({ me, messageList }: ChatMessagesProps) => {
 
-  const [user, setUSer] = useState<String>(me);
   const scrollView = useRef<ScrollView | null>(null);
-
-  useEffect(() => {
-    setUSer(me);
-    console.log(messageList);
-  }, [messageList])
-
+  console.log(me);
+  
   return (
     <ScrollView
       style={{ backgroundColor: "white", flex: 1 }}
       ref={(ref) => (scrollView.current = ref)}
     >
-      {messageList.map((message: any, index: number) => (
+      {messageList.map((message: MessageItem, index: number) => (
 
         //message component
-        <View key={index} style={[message.user !== user ? styles.messageContainer : styles.messageContainerMe]}>
+        <View key={index} style={[message.sender !== me ? styles.messageContainer : styles.messageContainerMe]}>
           <View style={styles.messageView}>
-            <Text style={[message.user !== user ? styles.message : styles.messageMe]}>
+            <Text style={[message.sender !== me ? styles.message : styles.messageMe]}>
               {message.text}
             </Text>
           </View>
           <View style={styles.timeView}>
-            <Text style={[message.user !== user ? styles.time : styles.timeMe]}>
+            <Text style={[message.sender !== me ? styles.time : styles.timeMe]}>
               {message.time}
             </Text>
           </View>

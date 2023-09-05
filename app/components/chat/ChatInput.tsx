@@ -41,7 +41,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
         style={styles.sendButton} 
         onPress={() => {
           setMessageText(message);
-          sendMessage();
+          
+          console.log("ON PRESS :" + message);
+          sendMessage(message);
           setMessage("");
         }
         }

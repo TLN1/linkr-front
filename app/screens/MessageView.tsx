@@ -31,7 +31,6 @@ const MessagesView = ({ route, navigation }: MessagesViewProps) => {
       console.log(route?.params?.recipient);
       if (route?.params?.username) {
         await get(`/chat/${route?.params?.recipient}`).then((response) => {
-          console.log(response.data.message_list);
           const messageList = response.data.message_list;
           setMessages([]);
           messageList.map((message: any) => (
@@ -49,7 +48,6 @@ const MessagesView = ({ route, navigation }: MessagesViewProps) => {
 
         wsRef.current.onmessage = (e) => {
           setMessages((prevMessages) => [...prevMessages, JSON.parse(e.data)]);
-          console.log(messages);
         };
       }
 
@@ -59,10 +57,13 @@ const MessagesView = ({ route, navigation }: MessagesViewProps) => {
   }, [message]);
 
 
-  const sendMessage = () => {
-    console.log("send");
+  const sendMessage = (messageText: string) => {
+    console.log("send message :" + messageText);
     console.log(route?.params?.recipient);
-    if (wsRef.current !== null) wsRef.current.send(JSON.stringify({ "user": route?.params?.recipient, "time": "12:00", "text": message }));
+    if (wsRef.current !== null) {
+      console.log("before eocket send:" + messageText);
+      wsRef.current.send(JSON.stringify({ "user": route?.params?.recipient, "time": "12:00", "text": messageText }));
+    }
     // setMessage("");
   };
 
