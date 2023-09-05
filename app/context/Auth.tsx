@@ -1,21 +1,28 @@
+import React from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useState } from "react";
 import { BASE_URL } from "../Constants";
 import { post } from "../axios";
+import { useDispatch } from "react-redux";
+import {
+  clearUserInfo,
+  setUserToken,
+  setUsername,
+} from "../actions/AuthActions";
 
 export const AuthContext = createContext<AuthContextType>({
   isLoading: false,
-  register: (username, password) => {},
-  login: (username, password) => {},
-  logout: () => {},
+  register: async (username, password) => {},
+  login: async (username, password) => {},
+  logout: async () => {},
 });
 
 export interface AuthContextType {
   isLoading: boolean;
-  register: (username: string, password: string) => void;
-  login: (username: string, password: string) => void;
-  logout: () => void;
+  register: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export interface AuthToken {
@@ -33,26 +40,22 @@ export interface Account {
 export const getAuthToken = () => {
   const [token, setToken] = useState(null);
   AsyncStorage.getItem("authToken").then((token) => {
-    console.log(token);
     if (token != null) setToken(JSON.parse(token).access_token);
   });
   return token;
 };
-
-function logout() {
-  AsyncStorage.removeItem("authToken");
-  AsyncStorage.removeItem("userInfo");
-}
 
 const AuthProvider = ({ children }: any) => {
   const [userInfo, setUserInfo] = useState({} as Account);
   const [authToken, setAuthToken] = useState<AuthToken>({} as AuthToken);
   const [isLoading, setIsLoading] = useState(false);
 
-  const register = (username: string, password: string) => {
+  const dispatch = useDispatch();
+
+  const register = async (username: string, password: string) => {
     setIsLoading(true);
 
-    post(
+    await post(
       `${BASE_URL}/register`,
       axios.toFormData({
         username: username,
@@ -64,12 +67,12 @@ const AuthProvider = ({ children }: any) => {
         },
       }
     )
-      .then((res) => {
+      .then(async (res) => {
         let userInfo = res.data;
         setUserInfo(userInfo);
         AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
 
-        login(username, password);
+        await login(username, password);
         setIsLoading(false);
         console.log(userInfo);
       })
@@ -77,10 +80,10 @@ const AuthProvider = ({ children }: any) => {
       .finally(() => setIsLoading(false));
   };
 
-  const login = (username: string, password: string) => {
+  const login = async (username: string, password: string) => {
     setIsLoading(true);
 
-    post(
+    await post(
       `${BASE_URL}/token`,
       axios.toFormData({
         username: username,
@@ -95,13 +98,26 @@ const AuthProvider = ({ children }: any) => {
       .then((res) => {
         let authToken = res.data;
         setAuthToken(authToken);
+
         AsyncStorage.setItem("authToken", JSON.stringify(authToken));
         console.log(authToken);
+
         AsyncStorage.setItem("username", username);
+        console.log(username);
+
+        dispatch(setUserToken(JSON.stringify(authToken)));
+        dispatch(setUsername(username));
       })
       .catch((e) => {})
       .finally(() => setIsLoading(false));
   };
+
+  const logout = async () => {
+    await AsyncStorage.removeItem("authToken");
+    await AsyncStorage.removeItem("userInfo");
+    await AsyncStorage.removeItem("username");
+    dispatch(clearUserInfo());
+  };  
 
   return (
     <AuthContext.Provider
@@ -109,11 +125,12 @@ const AuthProvider = ({ children }: any) => {
         isLoading,
         register,
         login,
-        logout,
+        logout
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
+
 export default AuthProvider;

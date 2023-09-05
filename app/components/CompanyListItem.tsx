@@ -1,27 +1,22 @@
 import { View, Text, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { del } from "../axios";
-import { showSuccessToast } from "./toast";
 import React from "react";
+import { showSuccessToast } from "./toast";
 
-interface Application {
+interface Company {
   id: number;
-  title: string;
-  location: string;
-  job_type: string;
-  experienceLevel: string;
-  skills: string[];
-  description: string;
+  name: string;
+  website: string;
+  industry: string;
+  organizationSize: string;
 }
 
-export function JobApplicationListItem(
-  application: any,
-  setApplicationId: any,
-  setModalVisible: any,
-  setUpdateApplicationId: any,
-  setUpdateModalVisible: any,
-  myCompany: any,
-  refresh: any,
+export function CompanyListItem(
+  company: any,
+  myCompany: boolean,
+  navigation: any,
+  refresh: boolean,
   setRefresh: any
 ) {
 
@@ -29,13 +24,13 @@ export function JobApplicationListItem(
     <View>
       <Pressable
         onPress={() => {
-          setApplicationId(application?.item?.id);
-          setModalVisible(true);
+          navigation.navigate("Company", { id: company?.item?.id });
         }}
       >
         <View
           style={{
-            padding: 10,
+            backgroundColor: "white",
+            padding: 8,
             flexDirection: "row",
             justifyContent: "space-between",
             paddingEnd: 0,
@@ -43,33 +38,48 @@ export function JobApplicationListItem(
         >
           <View style={{ padding: 10 }}>
             <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-              {application?.item?.title}
+              {company?.item?.name}
             </Text>
-            <Text style={{ fontSize: 15, color: "grey" }}>
-              {application?.item?.location}
+            <Text style={{ padding: 5, fontSize: 15, color: "grey" }}>
+              {company?.item?.industry}
             </Text>
           </View>
           {myCompany && (
             <View style={{ padding: 5 }}>
               <Feather.Button
+                style={{
+                  alignContent: "center",
+                  justifyContent: "center",
+                  flex: 1,
+                  alignSelf: "center",
+                  paddingEnd: 0,
+                }}
                 name="edit-3"
                 backgroundColor="white"
                 color="black"
                 onPress={() => {
-                  setUpdateApplicationId(application?.item?.id);
-                  setUpdateModalVisible(true);
+                  navigation.navigate("Update company data", {
+                    id: company?.item?.id,
+                  });
                 }}
               />
               <Feather.Button
+                style={{
+                  alignContent: "center",
+                  justifyContent: "center",
+                  flex: 1,
+                  alignSelf: "center",
+                  paddingEnd: 0,
+                }}
                 name="delete"
                 backgroundColor="white"
                 color="black"
                 onPress={async () => {
-                  await del(`/application/${application?.item?.id}`)
+                  await del(`/company/${company?.item?.id}`)
                     .then((res) => {
                       console.log("deleted");
                       setRefresh(!refresh);
-                      showSuccessToast("Job application deleted");
+                      showSuccessToast("Company deleted");
                     })
                     .catch((e) => {
                       console.log(e);

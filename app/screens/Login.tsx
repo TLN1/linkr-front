@@ -6,6 +6,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import TlnButton from "../components/TlnButton";
 import WebSocketSingleton from "../WebSocketSingleton";
 import { showErrorToast } from "../components/toast";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React from "react";
 
 interface NavigationProps {
   navigation: NativeStackNavigationProp<any, "Login">;
@@ -51,10 +53,21 @@ function Helper({ navigation, register }: HelperProps) {
     }
 
     if (register) {
-      authContext.register(username, password);
+      await authContext.register(username, password);
     } else {
-      authContext.login(username, password);
+      await authContext.login(username, password);
     }
+
+    setUsername("");
+    setPassword("");
+
+    // const loggedInUser = await AsyncStorage.getItem("username");
+    // console.log(loggedInUser);
+
+    // if (loggedInUser) {
+    //   console.log(loggedInUser);
+    //   // navigation.navigate("User Profile", { username: loggedInUser });
+    // }
     
     const websocketUrl = `ws://127.0.0.1:8000/register/ws/${username}`;
     const ws = WebSocketSingleton.getWebSocket(username, websocketUrl);
@@ -112,7 +125,7 @@ function Helper({ navigation, register }: HelperProps) {
     </View>
   );
 }
-// TODO: [NK] ADD REGISTER SCREEN, LOGIN ACTION
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -6,3 +6,10 @@ export function showErrorToast(message: string) {
     animationType: "slide-in",
   });
 }
+
+export function showSuccessToast(message: string) {
+  Toast.show(message, {
+    type: "success",
+    animationType: "slide-in",
+  });
+}
