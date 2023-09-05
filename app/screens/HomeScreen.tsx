@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React = require("react");
+import React from "react";
 import {
   Button,
   Dimensions,
@@ -18,6 +18,7 @@ import { get, put } from "../axios";
 import { useSelector } from "react-redux";
 import { set } from "react-native-reanimated";
 import { useEffect, useState } from "react";
+import SwipeView from "./SwipeView";
 
 interface Props {
   navigation: NativeStackNavigationProp<any, "Homescreen">;
@@ -75,7 +76,11 @@ const HomeScreen = ({ navigation }: Props) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ height: 50, backgroundColor: "white" }}>
+      <SwipeView
+        mode={switchState ? "application" : "profile"}
+        application_id={jobAppId}
+      />
+      {/* <View style={{ height: 50, backgroundColor: "white" }}>
         <View
           style={{
             flexDirection: "row",
@@ -164,7 +169,7 @@ const HomeScreen = ({ navigation }: Props) => {
             onCancel={cancelPreferences}
           />
         </View>
-      </Modal>
+      </Modal> */}
     </SafeAreaView>
   );
 };

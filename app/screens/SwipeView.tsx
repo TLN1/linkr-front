@@ -134,7 +134,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
     console.log("FETCHING DATA");
 
     if (mode === "application") {
-      get(`${BASE_URL}/swipe/list/applications`, {
+      get("/swipe/list/applications", {
         params: {
           amount: STACK_SIZE,
         },
@@ -161,7 +161,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
           console.log(e);
         });
     } else if (mode === "profile" && application_id) {
-      get(`${BASE_URL}/swipe/list/users`, {
+      get("/swipe/list/users", {
         params: {
           amount: STACK_SIZE,
           swiper_application_id: application_id,
@@ -192,13 +192,13 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
 
   useEffect(() => {
     fetchData();
-  }, [isFocused]);
+  }, []);
 
   const onSwipeApplication = (
     application_id: number,
     direction: "left" | "right"
   ) => {
-    put(`${BASE_URL}/swipe/application`, {
+    put("/swipe/application", {
       application_id: application_id,
       direction: direction,
     })
@@ -217,7 +217,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
     swiped_username: string,
     direction: "left" | "right"
   ) => {
-    put(`${BASE_URL}/swipe/user`, {
+    put("/swipe/user", {
       application_id: swiper_application_id,
       swiped_username: swiped_username,
       direction: direction,
@@ -375,20 +375,18 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
   };
 
   return (
-    <SafeAreaView>
-      <Swiper
-        ref={swiperRef}
-        cards={cards}
-        cardIndex={0}
-        verticalSwipe={false}
-        stackSize={3}
-        backgroundColor="#FFFFFF"
-        animateCardOpacity
-        renderCard={onRenderCard}
-        onSwipedLeft={onSwipedLeft}
-        onSwipedRight={onSwipedRight}
-      />
-    </SafeAreaView>
+    <Swiper
+      ref={swiperRef}
+      cards={cards}
+      cardIndex={0}
+      verticalSwipe={false}
+      stackSize={3}
+      backgroundColor="#FFFFFF"
+      animateCardOpacity
+      renderCard={onRenderCard}
+      onSwipedLeft={onSwipedLeft}
+      onSwipedRight={onSwipedRight}
+    />
   );
 }
 

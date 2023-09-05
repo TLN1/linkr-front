@@ -9,14 +9,13 @@ import React from "react";
 import { useSelector } from "react-redux";
 import CompanyNavigator from "./CompanyNavigator";
 import MessagesView from "../screens/MessageView";
-import ChatListView from "../screens/ChatsListView"
+import ChatListView from "../screens/ChatsListView";
 import ConversationsScreen from "../screens/ChatsListView";
 import ChatNavigator from "./ChatNavigator";
 
 const Tab = createMaterialBottomTabNavigator();
 
 function MainNavigator() {
-
   const username = useSelector((state) => state.auth.username);
 
   return (
@@ -30,6 +29,14 @@ function MainNavigator() {
           name="HomeNavigator"
           options={{ tabBarIcon: "home", tabBarLabel: "Home" }}
           component={HomeNavigator}
+        />
+        <Tab.Screen
+          name="ChatNavigator"
+          options={{
+            tabBarIcon: "chat",
+            tabBarLabel: "My Chats",
+          }}
+          component={ChatNavigator}
         />
         {username ? (
           <Tab.Screen
@@ -52,14 +59,6 @@ function MainNavigator() {
             tabBarLabel: "My companies",
           }}
           component={CompanyNavigator}
-        />
-        <Tab.Screen
-          name="ChatNavigator"
-          options={{
-            tabBarIcon: "",
-            tabBarLabel: "My Chats",
-          }}
-          component={ChatNavigator}
         />
       </Tab.Navigator>
     </AuthProvider>
