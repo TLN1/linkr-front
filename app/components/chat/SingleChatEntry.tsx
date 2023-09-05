@@ -18,10 +18,12 @@ interface ChatItem{
 }
 
 interface Props {
+    recipient: string,
     chat: ChatItem
   }
 
-const SingleChatEntry = ({ chat}: Props) => {
+const SingleChatEntry = ({ recipient, chat}: Props) => { 
+
     return (
         <View style={styles.aboutField}>
             <TouchableOpacity style={styles.conversation}
@@ -35,7 +37,7 @@ const SingleChatEntry = ({ chat}: Props) => {
                         flexDirection: 'row',
                         justifyContent: 'space-between'
                     }}>
-                        <Text style={styles.username}>{chat.username2}</Text>
+                        <Text style={styles.username}>{recipient}</Text>
                         <Text style={styles.time}>{"12:00"}</Text>
                     </View>
                     <View style={{

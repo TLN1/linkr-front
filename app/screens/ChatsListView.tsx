@@ -9,7 +9,8 @@ import { get, post, put } from "../axios";
 import SingleChatEntry from '../components/chat/SingleChatEntry';
 
 interface MessageItem {
-    user: string,
+    sender: string,
+    recipient: string,
     time: string;
     text: string;
 }
@@ -31,22 +32,16 @@ interface Props {
 const ChatsListView = ({ navigation, route }: Props) => {
 
     const [chats, setChats] = useState([]);
-    const [username, setUsername] = useState();
+    
 
     useEffect(() => {
-
-        async function updateUserInfo() {
-            const userInfo = await AsyncStorage.getItem("userInfo");
-            setUsername(userInfo);
-        }
-
+        console.log(route?.params?.username);
 
         async function getUserChats() {
             const response = await get("/chats");
-
             console.log(response?.data);
+            setChats(response?.data.chats);
         }
-        updateUserInfo();
         getUserChats();
     },
         []);
@@ -77,12 +72,15 @@ const ChatsListView = ({ navigation, route }: Props) => {
                 {chats.map((chat: any, index: number) => (
                     <TouchableOpacity key={index}
                         onPress={() => {
-                            const recipient = username === chat.username1 ? chat.username2 : chat.username1;
-                            navigation.navigate("Chat", { recipient })
-
+                            const recipient = route?.params?.username === chat.username1 ? chat.username2 : chat.username1;
+                            console.log("CHAT LIST");
+                            console.log(route?.params?.username);
+                            console.log(recipient);
+                            navigation.navigate("Chat", { recipient: recipient , username: route?.params?.username})
                         }}>
                         <SingleChatEntry
                             chat={chat}
+                            recipient={route?.params?.username === chat.username1 ? chat.username2 : chat.username1}
                         />
                     </TouchableOpacity>
                 ))}
