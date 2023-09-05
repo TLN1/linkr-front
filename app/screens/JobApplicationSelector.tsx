@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
+import React, { useState, useEffect } from "react";
+import { View, Text, Button, StyleSheet } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 import { get, post, put } from "../axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useDispatch } from "react-redux";
+import { setApplicationId } from "../actions/PresetActions";
 
 interface Company {
   id: number;
@@ -13,27 +15,47 @@ interface Company {
   organizationSize: string;
 }
 
+interface Application {
+  id: number;
+  title: string;
+  location: string;
+  job_type: string;
+  experience_level: string;
+  skills: string[];
+  description: string;
+  company_id: number;
+  views: number;
+}
+
 interface DropDownSchema {
   label: string;
   value: number;
 }
 
 interface Props {
+  setAppId: any;
   name: string;
-  onCancel: any,
+  onCancel: any;
   navigation: NativeStackNavigationProp<any, "Profile">;
 }
 
-const JobApplicationSelector: React.FC = ({ name, onCancel, navigation }: Props) => {
-
+const JobApplicationSelector = ({
+  name,
+  onCancel,
+  navigation,
+  setAppId,
+}: Props) => {
   const [companyOpen, setCompanyOpen] = useState(false);
   const [companyItems, setCompanyItems] = useState<DropDownSchema[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<DropDownSchema>()
+  const companyIdByName: { [key: string]: number } = {};
 
   const [jobAppOpen, setJobAppOpen] = useState(false);
   const [jobAppItems, setJobAppItems] = useState<DropDownSchema[]>([]);
-  const [selectedJobApp, setSelectedJobApp] = useState<DropDownSchema>()
+  const [selectedJobApp, setSelectedJobApp] = useState<number | null>(null);
 
+  const [companyId, setCompanyId] = useState(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -48,49 +70,39 @@ const JobApplicationSelector: React.FC = ({ name, onCancel, navigation }: Props)
           label: c.name,
           value: c.id,
         });
+        companyIdByName[c.name] = c.id;
       });
       setCompanyItems(results);
     };
 
-    const fetchPresetActiveJobApplication = async () => {
-      try {
-        const token = await AsyncStorage.getItem("authToken");
-        if (token) {
-          const accessToken = JSON.parse(token).access_token;
-
-        }
-      } catch (error) {
-        console.error("Error fetching preset job app:", error);
-      }
-    };
-
     fetchCompanies();
-    fetchPresetActiveJobApplication()
-  }, [jobAppItems]);
+    fetchCompanyJobApps();
+    // if (selectedJobApp) saveJobApp();
+  }, [companyId]);
 
   const fetchCompanyJobApps = async () => {
-    console.log(selectedCompany);
-    if (selectedCompany) {
-      const { data } = await get(`/company/${selectedCompany}`);
+    if (companyId) {
+      const { data } = await get(`/company/${companyId}`);
       const results: DropDownSchema[] = [];
-      data?.applications.forEach((c: Company) => {
+      data?.applications.forEach((a: Application) => {
         results.push({
-          label: c.name,
-          value: c.id,
+          label: a.title,
+          value: a.id,
         });
       });
       setJobAppItems(results);
     }
-
-  }
+  };
 
   const saveJobApp = async () => {
     console.log("SAVESAVESAVE");
-
+    console.log(selectedJobApp);
+    dispatch(setApplicationId(selectedJobApp));
+    onCancel();
   };
 
   const cancel = () => {
-    onCancel()
+    onCancel();
   };
 
   return (
@@ -98,57 +110,55 @@ const JobApplicationSelector: React.FC = ({ name, onCancel, navigation }: Props)
       <View style={styles.dialogFrame}>
         <Text>Select Company:</Text>
 
-
         <DropDownPicker
           style={styles.dropdownone}
           containerStyle={styles.dropdownContainerStyleOne}
           open={companyOpen}
-          value={selectedCompany ? selectedCompany.value : null}
+          value={companyId}
           items={companyItems}
           min={0}
           max={companyItems.length}
           setOpen={setCompanyOpen}
-          setValue={setSelectedCompany}
-          onSelectItem={fetchCompanyJobApps}
+          setValue={setCompanyId}
           placeholder="Select Company"
+          dropDownContainerStyle={styles.dropdownListContainerStyle}
         />
 
-        <Text>Select Job Application:</Text> 
+        <Text>Select Job Application:</Text>
 
         <DropDownPicker
           style={styles.dropdowntwo}
           containerStyle={styles.dropdownContainerStyleTwo}
           open={jobAppOpen}
-          value={selectedJobApp ? selectedJobApp.value : null}
+          value={selectedJobApp}
           items={jobAppItems}
           min={0}
           max={jobAppItems.length}
           setOpen={setJobAppOpen}
           setValue={setSelectedJobApp}
           placeholder="Select Job Location"
+          dropDownContainerStyle={styles.dropdownListContainerStyle}
         />
 
         <Button title="Save" onPress={saveJobApp} color="black" />
         <View style={styles.buttonSeparator} />
         <Button title="Cancel" onPress={cancel} color="black" />
       </View>
-
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-
   dialogContainer: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   dialogFrame: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderWidth: 2,
-    borderColor: 'black',
+    borderColor: "black",
     borderRadius: 10,
     padding: 20,
     elevation: 5,
@@ -225,19 +235,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   saveButton: {
-    backgroundColor: 'black',
+    backgroundColor: "black",
     borderRadius: 10,
     marginTop: 10,
   },
   cancelButton: {
-    backgroundColor: 'black',
+    backgroundColor: "black",
     borderRadius: 10,
     marginTop: 10,
   },
   buttonSeparator: {
     height: 1,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     marginVertical: 10,
+  },
+  dropdownListContainerStyle: {
+    borderColor: "#bbb",
   },
 });
 
