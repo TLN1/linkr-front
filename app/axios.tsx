@@ -2,6 +2,8 @@ import axios, { AxiosResponse } from "axios";
 import { BASE_URL } from "./Constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { showErrorToast } from "./components/toast";
+import store from "./context/ReduxStore";
+import { clearUserInfo } from "./actions/AuthActions";
 
 const axiosInstanse = axios.create({ baseURL: BASE_URL });
 
@@ -32,6 +34,7 @@ const responseErrorInterceptor = async (error: any) => {
       // deleteAuthHeader();
       AsyncStorage.removeItem("authToken");
       AsyncStorage.removeItem("userInfo");
+      store.dispatch(clearUserInfo());
     }
 
     showErrorToast(error.response.data.detail);
