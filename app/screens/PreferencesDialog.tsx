@@ -211,21 +211,14 @@ const PreferenceDialog = ({
           placeholder="Select Experience Level"
           dropDownContainerStyle={styles.dropdownListContainerStyle}
         />
-        <View style={styles.saveButton}>
-        <Button
-          title="Save"
-          onPress={savePreferences}
-          color="black"
-          
-        />
-        </View>
+
+        <Button title="Save" onPress={savePreferences} color="black" />
 
         <View style={styles.buttonSeparator} />
         <Button
           title="Cancel"
           onPress={cancel}
           color="black"
-          style={styles.cancelButton}
         />
       </View>
     </View>
@@ -318,11 +311,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  saveButton: {
-    backgroundColor: "black",
-    borderRadius: 10,
-    marginTop: 10,
-  },
+  // saveButton: {
+  //   backgroundColor: "black",
+  //   borderRadius: 10,
+  //   marginTop: 10,
+  // },
   cancelButton: {
     backgroundColor: "black",
     borderRadius: 10,

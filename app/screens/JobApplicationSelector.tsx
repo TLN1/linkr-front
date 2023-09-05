@@ -95,7 +95,6 @@ const JobApplicationSelector = ({
   };
 
   const saveJobApp = async () => {
-    console.log("SAVESAVESAVE");
     console.log(selectedJobApp);
     dispatch(setApplicationId(selectedJobApp));
     onCancel();
