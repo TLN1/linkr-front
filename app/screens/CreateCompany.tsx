@@ -13,10 +13,12 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import { get, post, put } from "../axios";
 import * as ImagePicker from "expo-image-picker";
+import React from "react";
+import { ScrollView } from "react-native-virtualized-view";
 
 interface Props {
   navigation: NativeStackNavigationProp<any, "CreateCompany">;
-  id?: number;
+  route: any;
 }
 
 interface DropDownSchema {
@@ -31,7 +33,8 @@ interface Company {
   organizationSize: string;
 }
 
-const CreateCompany = ({ navigation, id }: Props) => {
+const CreateCompany = ({ route, navigation }: Props) => {
+  const [id, setId] = useState(route?.params?.id);
   const [hasGalleryPermission, setHasGalleryPermission] = useState(false);
   const [image, setImage] = useState("");
   const [coverImage, setCoverImage] = useState("");
@@ -77,7 +80,7 @@ const CreateCompany = ({ navigation, id }: Props) => {
 
     // console.log(result);
     if (!result.canceled) {
-      console.log(result.assets[0]);
+      // console.log(result.assets[0]);
       var filename = result.assets[0].fileName?.toLocaleLowerCase();
       if (filename) {
         var extension = filename?.substring(filename.lastIndexOf(".") + 1);
@@ -108,6 +111,8 @@ const CreateCompany = ({ navigation, id }: Props) => {
   const [organizationSize, setOrganizationSize] = useState("");
   const [organizationSizeOpen, setOrganizationSizeOpen] = useState(false);
   const [organizationSizeItems, setOrganizationSizeItems] = useState([]);
+
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     async function fetchIndustryData() {
@@ -149,6 +154,7 @@ const CreateCompany = ({ navigation, id }: Props) => {
       setWebsite(data?.website);
       setIndustry(data?.industry);
       setOrganizationSize(data?.organization_size);
+      setDescription(data?.description);
       setImage(data?.image_uri);
       setCoverImage(data?.cover_image_uri);
     }
@@ -163,13 +169,13 @@ const CreateCompany = ({ navigation, id }: Props) => {
     })();
 
     if (id) fetchCompanyData(id);
-  }, []);
+  }, [id]);
 
   return (
     <View
       style={{
         backgroundColor: "white",
-        height: Dimensions.get("window").height - 65,
+        height: Dimensions.get("window").height,
       }}
     >
       <View>
@@ -195,7 +201,11 @@ const CreateCompany = ({ navigation, id }: Props) => {
         </View>
         <Pressable onPress={pickImage}>
           <View
-            style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
+            style={{
+              alignItems: "flex-start",
+              padding: 10,
+              marginLeft: "5%",
+            }}
           >
             <Image
               source={
@@ -215,89 +225,119 @@ const CreateCompany = ({ navigation, id }: Props) => {
           </View>
         </Pressable>
       </View>
-      <View
-        style={{
-          padding: 30,
-          marginHorizontal: 30,
-        }}
-      >
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={(text) => setName(text)}
-          placeholder="Enter name"
-        />
-
-        <TextInput
-          style={styles.input}
-          value={website}
-          onChangeText={(text) => setWebsite(text)}
-          placeholder="Enter website"
-        />
-
-        <DropDownPicker
-          style={styles.dropdownone}
-          containerStyle={styles.dropdownContainerStyleOne}
-          open={industryOpen}
-          value={industry}
-          items={industryItems}
-          setOpen={setIndustryOpen}
-          setValue={setIndustry}
-          placeholder="Select industry"
-          //   setItems={setIndustryItems}
-        />
-
-        <DropDownPicker
-          style={styles.dropdowntwo}
-          containerStyle={styles.dropdownContainerStyleTwo}
-          listChildContainerStyle={styles.dropdowntwo}
-          open={organizationSizeOpen}
-          value={organizationSize}
-          items={organizationSizeItems}
-          setOpen={setOrganizationSizeOpen}
-          setValue={setOrganizationSize}
-          placeholder="Select Organization Size"
-          //   setItems={setIndustryItems}
-        />
-        <View style={{ marginTop: 60 }}>
-          <Button
-            title="Setup company"
-            color={"black"}
-            onPress={async () => {
-              if (id) {
-                await put(`/company/${id}`, {
-                  name: name,
-                  website: website,
-                  industry: industry,
-                  organization_size: organizationSize,
-                  image_uri: image,
-                  cover_image_uri: coverImage,
-                })
-                  .then((res) => {
-                    console.log(res);
-                  })
-                  .catch((e) => {
-                    console.log(e);
-                  });
-              } else {
-                await post("/company/", {
-                  name: name,
-                  website: website,
-                  industry: industry,
-                  organization_size: organizationSize,
-                  image_uri: image,
-                  cover_image_uri: coverImage,
-                })
-                  .then((res) => {
-                    console.log(res);
-                  })
-                  .catch((e) => {
-                    console.log(e);
-                  });
-              }
+      <View style={{ height: Dimensions.get("window").height - 400 }}>
+        <ScrollView>
+          <View
+            style={{
+              padding: 30,
+              marginHorizontal: 30,
             }}
-          />
-        </View>
+          >
+            <View style={{ padding: 8 }}>
+              <Text style={{ fontSize: 15, padding: 8 }}>Company name:</Text>
+              <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={(text) => setName(text)}
+                placeholder="Enter name"
+              />
+            </View>
+
+            <View style={{ padding: 8 }}>
+              <Text style={{ fontSize: 15, padding: 8 }}>Website:</Text>
+              <TextInput
+                style={styles.input}
+                value={website}
+                onChangeText={(text) => setWebsite(text)}
+                placeholder="Enter website"
+              />
+            </View>
+
+            <Text style={{ fontSize: 15, padding: 8 }}>Industry:</Text>
+            <DropDownPicker
+              style={styles.dropdownone}
+              containerStyle={styles.dropdownContainerStyleOne}
+              open={industryOpen}
+              value={industry}
+              items={industryItems}
+              setOpen={setIndustryOpen}
+              setValue={setIndustry}
+              placeholder="Select industry"
+              dropDownContainerStyle={styles.dropdownListContainerStyle}
+              //   setItems={setIndustryItems}
+            />
+
+            <Text style={{ fontSize: 15, padding: 8 }}>Organization size:</Text>
+
+            <DropDownPicker
+              style={styles.dropdowntwo}
+              containerStyle={styles.dropdownContainerStyleTwo}
+              listChildContainerStyle={styles.dropdowntwo}
+              open={organizationSizeOpen}
+              value={organizationSize}
+              items={organizationSizeItems}
+              setOpen={setOrganizationSizeOpen}
+              setValue={setOrganizationSize}
+              placeholder="Select Organization Size"
+              dropDownContainerStyle={styles.dropdownListContainerStyle}
+              //   setItems={setIndustryItems}
+            />
+
+            <View>
+              <Text style={{ fontSize: 15, padding: 8 }}>Description:</Text>
+              <TextInput
+                multiline
+                style={styles.descriptionInput}
+                onChangeText={setDescription}
+                value={description}
+                placeholder="Write description"
+                // keyboardType="text"
+              />
+            </View>
+
+            <View style={{ marginTop: 60 }}>
+              <Button
+                title="Setup company"
+                color={"black"}
+                onPress={async () => {
+                  if (id) {
+                    await put(`/company/${id}`, {
+                      name: name,
+                      website: website,
+                      industry: industry,
+                      organization_size: organizationSize,
+                      description: description,
+                      image_uri: image,
+                      cover_image_uri: coverImage,
+                    })
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((e) => {
+                        console.log(e);
+                      });
+                  } else {
+                    await post("/company", {
+                      name: name,
+                      website: website,
+                      industry: industry,
+                      organization_size: organizationSize,
+                      image_uri: image,
+                      description: description,
+                      cover_image_uri: coverImage,
+                    })
+                      .then((res) => {
+                        console.log(res);
+                      })
+                      .catch((e) => {
+                        console.log(e);
+                      });
+                  }
+                }}
+              />
+            </View>
+          </View>
+        </ScrollView>
       </View>
     </View>
   );
@@ -317,7 +357,7 @@ const styles = StyleSheet.create({
     width: "80%",
   },
   input: {
-    marginTop: 10,
+    // marginTop: 10,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: "#bbb",
@@ -349,8 +389,7 @@ const styles = StyleSheet.create({
   },
   dropdownContainerStyleOne: {
     zIndex: 2,
-    marginTop: 10,
-    marginBottom: 10,
+    padding: 8,
     borderColor: "#bbb",
     borderRadius: 5,
     position: "relative",
@@ -359,8 +398,7 @@ const styles = StyleSheet.create({
   },
   dropdownContainerStyleTwo: {
     zIndex: 1,
-    marginTop: 10,
-    marginBottom: 10,
+    padding: 8,
     borderColor: "#bbb",
     borderRadius: 5,
     position: "relative",
@@ -369,6 +407,19 @@ const styles = StyleSheet.create({
   },
   submitButtom: {
     borderRadius: 5,
+  },
+  dropdownListContainerStyle: {
+    borderColor: "#bbb",
+    margin: 10,
+  },
+  descriptionInput: {
+    borderWidth: 1,
+    borderColor: "#bbb",
+    borderRadius: 5,
+    backgroundColor: "white",
+    maxHeight: 300,
+    padding: 10,
+    margin: 8,
   },
 });
 

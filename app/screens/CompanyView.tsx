@@ -1,20 +1,29 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import Spinner from "react-native-loading-spinner-overlay";
 import { useEffect, useState } from "react";
 import {
-  ScrollView,
   Pressable,
   View,
   Image,
   Text,
   Dimensions,
   StyleSheet,
+  Modal,
+  FlatList,
+  ScrollView,
 } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
-import { get } from "../axios";
+import { get, post, put } from "../axios";
+import JobApplication from "../components/JobApplication";
+import { JobApplicationListItem } from "../components/JobApplicationListItem";
+import { Ionicons } from "@expo/vector-icons";
+import { JobApplicationView } from "../components/JobApplicationView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React from "react";
 
 interface Props {
-  id: number;
-  navigation: NativeStackNavigationProp<any, "Profile">;
+  route: any;
+  navigation: NativeStackNavigationProp<any, "Coompany">;
 }
 
 const AboutTab = (
@@ -42,39 +51,213 @@ const AboutTab = (
   );
 };
 
-const JobAppliationsTab = () => {
-  // TODO: api sync
+const displayViewJobApplicaitonModal = (
+  applicationId,
+  isVisible,
+  setModelVisible
+) => {
   return (
-    <ScrollView>
-      <Text>Job applications</Text>
-    </ScrollView>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={() => setModelVisible(false)}
+    >
+      <View>
+        <View style={styles.modalContent}>
+          {JobApplicationView(applicationId, isVisible, setModelVisible)}
+        </View>
+      </View>
+    </Modal>
   );
 };
 
-const CompanyView = ({ id, navigation }: Props) => {
-  useEffect(() => {
-    async function fetchCompanyData(id: number) {
-      // Fetch data
-      const { data } = await get(`/company/${id}`);
+const displayJobApplicationModal = (
+  isVisible: boolean,
+  setIsVisible: any,
+  companyId: number,
+  fetchCompanyData: any,
+  setIsLoading: any,
+  applicationId: number | null,
+  action: (
+    id: number,
+    title: string,
+    experienceLevel: string,
+    type: string,
+    location: string,
+    skills: string[],
+    description: string
+  ) => void
+) => {
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={() => setIsVisible(false)}
+    >
+      <View>
+        <View style={styles.modalContent}>
+          {JobApplication(
+            setIsVisible,
+            companyId,
+            fetchCompanyData,
+            setIsLoading,
+            applicationId,
+            action
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
-      // Update the options state
-      setName(data?.name);
-      setWebsite(data?.website);
-      setIndustry(data?.industry);
-      setOrganizationSize(data?.organization_size);
-      setImage(data?.image_uri);
-      setCoverImage(data?.cover_image_uri);
-    }
+const saveJobApp = async (
+  companyId: number,
+  title: string,
+  experienceLevel: string,
+  type: string,
+  location: string,
+  skills: string[],
+  description: string
+) => {
+  await post("/application", {
+    title: title,
+    experience_level: experienceLevel,
+    job_type: type,
+    location: location,
+    skills: skills,
+    description: description,
+    company_id: companyId,
+  });
+  // .then((res) => {
+  //   console.log(res);
+  //   // navigate
+  // });
+};
 
-    if (id) fetchCompanyData(id);
-  }, []);
+const updateJobApp = async (
+  applicationId: number,
+  title: string,
+  experienceLevel: string,
+  type: string,
+  location: string,
+  skills: string[],
+  description: string
+) => {
+  await put(`/application/${applicationId}/update`, {
+    id: applicationId,
+    title: title,
+    experience_level: experienceLevel,
+    job_type: type,
+    location: location,
+    skills: skills,
+    description: description,
+  });
+  // .then((res) => {
+  //   console.log(res);
+  //   // navigate
+  // });
+};
+
+interface Application {
+  id: number;
+  title: string;
+  location: string;
+  job_type: string;
+  experienceLevel: string;
+  skills: string[];
+  description: string;
+}
+
+const JobAppliationsTab = (
+  applications: Application[],
+  isAddVisible: boolean,
+  setIsAddVisible: any,
+  setUpdateApplicationId: any,
+  isUpdateVisible: boolean,
+  setIsUpdateVisible: any,
+  setViewApplicationId: any,
+  setViewModalVisible: any,
+  myCompany: any
+) => {
+  useEffect(() => {}, [applications]);
+  return (
+    <View style={{ flex: 1 }}>
+      {/* <ScrollView> */}
+      <View style={{ padding: 8 }}>
+        <Ionicons.Button
+          name="add"
+          size={24}
+          color="black"
+          backgroundColor="white"
+          onPress={() => setIsAddVisible(true)}
+        >
+          Add job application
+        </Ionicons.Button>
+      </View>
+      <View style={{ width: "100%", height: "40%" }}>
+        <FlatList
+          data={applications}
+          renderItem={(application) =>
+            JobApplicationListItem(
+              application,
+              setViewApplicationId,
+              setViewModalVisible,
+              setUpdateApplicationId,
+              setIsUpdateVisible,
+              myCompany
+            )
+          }
+          keyExtractor={(item, index) => index.toString()}
+        />
+      </View>
+      {/* </ScrollView> */}
+    </View>
+  );
+};
+/** <View>
+      {applications?.map((application) => JobApplicationListItem(application))}
+      </View> */
+const CompanyView = ({ route, navigation }: Props) => {
+  const [id, setId] = useState(route?.params?.id);
+  const [refresh, setRefresh] = useState(false);
+
+  async function fetchCompanyData(id: number) {
+    // Fetch data
+    console.log("REFRESH");
+    setIsLoading(true);
+    const { data } = await get(`/company/${id}`);
+    console.log("HERE");
+    // Update the options state
+    setName(data?.name);
+    setWebsite(data?.website);
+    setIndustry(data?.industry);
+    setOrganizationSize(data?.organization_size);
+    setImage(data?.image_uri);
+    setCoverImage(data?.cover_image_uri);
+    setApplications(data?.applications);
+
+    // console.log(data?.owner_username);
+    var username = await AsyncStorage.getItem("username");
+    setMyCompany(data?.owner_username == username);
+    setIsLoading(false);
+    setAddModalVisible(false);
+    setUpdateModalVisible(false);
+    // console.log(username);
+    // console.log(myCompany);
+  }
 
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
   const [industry, setIndustry] = useState("");
   const [organizationSize, setOrganizationSize] = useState("");
-  const [image, setImage] = useState("");
-  const [coverImage, setCoverImage] = useState("");
+  const [image, setImage] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+
+  const [applications, setApplications] = useState([]);
 
   const [tabViewIndex, setTabViewIndex] = useState(0);
   const routes = [
@@ -82,8 +265,46 @@ const CompanyView = ({ id, navigation }: Props) => {
     { key: "jobApplications", title: "Job Applications" },
   ];
 
+  const [updateApplicationId, setUpdateApplicationId] = useState<number | null>(
+    null
+  );
+  const [viewApplicationId, setViewApplicationId] = useState<number | null>(
+    null
+  );
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [myCompany, setMyCompany] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (id) fetchCompanyData(id);
+  }, [id]);
+
   return (
     <View style={{ backgroundColor: "white" }}>
+      <Spinner visible={isLoading} />
+      {displayViewJobApplicaitonModal(
+        viewApplicationId,
+        viewModalVisible,
+        setViewModalVisible
+      )}
+      {displayJobApplicationModal(
+        addModalVisible,
+        setAddModalVisible,
+        id,
+        fetchCompanyData,
+        setIsLoading,
+        null,
+        saveJobApp
+      )}
+      {displayJobApplicationModal(
+        updateModalVisible,
+        setUpdateModalVisible,
+        id,
+        fetchCompanyData,
+        setIsLoading,
+        updateApplicationId,
+        updateJobApp
+      )}
       <View
         style={{
           width: "100%",
@@ -126,7 +347,18 @@ const CompanyView = ({ id, navigation }: Props) => {
           navigationState={{ index: tabViewIndex, routes: routes }}
           renderScene={SceneMap({
             about: () => AboutTab(website, industry, organizationSize),
-            jobApplications: JobAppliationsTab,
+            jobApplications: () =>
+              JobAppliationsTab(
+                applications,
+                addModalVisible,
+                setAddModalVisible,
+                setUpdateApplicationId,
+                updateModalVisible,
+                setUpdateModalVisible,
+                setViewApplicationId,
+                setViewModalVisible,
+                myCompany
+              ),
           })}
           onIndexChange={(index) => setTabViewIndex(index)}
           initialLayout={{ width: Dimensions.get("window").width }}
@@ -169,6 +401,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "bold",
     color: "grey",
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "grey",
+    height: Dimensions.get("window").height,
   },
 });
 
