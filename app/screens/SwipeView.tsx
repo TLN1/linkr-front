@@ -4,7 +4,7 @@ import Swiper from "react-native-deck-swiper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Unorderedlist from "react-native-unordered-list";
 import React from "react";
-import { get, post } from "../axios";
+import { get, put } from "../axios";
 import { BASE_URL } from "../Constants";
 import { useIsFocused } from "@react-navigation/native";
 
@@ -16,6 +16,7 @@ interface SwipeViewProps {
 class Card {}
 
 interface ApplicationCard extends Card {
+  application_id: number;
   title: string;
   location: string;
   job_type: string;
@@ -40,6 +41,7 @@ const STACK_SIZE = 10;
 
 const CARDS: ApplicationCard[] = [
   {
+    application_id: 1,
     title: "Software Engineer",
     location: "remote",
     job_type: "Full-time",
@@ -48,6 +50,7 @@ const CARDS: ApplicationCard[] = [
     description: "aaaaaaa",
   },
   {
+    application_id: 2,
     title: "Bartender",
     location: "On-site",
     job_type: "Full-time",
@@ -56,6 +59,7 @@ const CARDS: ApplicationCard[] = [
     description: "aaaaaaa",
   },
   {
+    application_id: 3,
     title: "DO",
     location: "remote",
     job_type: "Full-time",
@@ -64,6 +68,7 @@ const CARDS: ApplicationCard[] = [
     description: "aaaaaaa",
   },
   {
+    application_id: 4,
     title: "DO",
     location: "remote",
     job_type: "Full-time",
@@ -125,7 +130,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
   const swiperRef = useRef<Swiper<Card>>(null);
   const [cards, setCards] = useState<Card[]>([]);
 
-  const fetchData = async () => {
+  const fetchData = () => {
     console.log("FETCHING DATA");
 
     if (mode === "application") {
@@ -138,6 +143,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
           const swipe_list: any[] = res.data.swipe_list;
           const newData = swipe_list.map((val) => {
             const appCard: ApplicationCard = {
+              application_id: val.id,
               title: val.title,
               description: val.description,
               experience_level: val.experience_level,
@@ -162,33 +168,94 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
         },
       })
         .then((res) => {
-          console.log(res.data.swipe_list);
+          const swipe_list: any[] = res.data.swipe_list;
+          console.log(swipe_list);
+
+          const newData = swipe_list.map((val) => {
+            const profileCard: UserProfile = {
+              username: val.username,
+              educations: val.education,
+              experience: val.experience,
+              skills: val.skills,
+            };
+
+            return profileCard;
+          });
+
+          setCards([...cards, ...newData]);
         })
         .catch((e) => {
           console.log(e);
         });
     }
-    // const newData = OTHER;
-    // setCards([...cards, ...newData]);
   };
 
   useEffect(() => {
     fetchData();
   }, [isFocused]);
 
+  const onSwipeApplication = (
+    application_id: number,
+    direction: "left" | "right"
+  ) => {
+    put(`${BASE_URL}/swipe/application`, {
+      application_id: application_id,
+      direction: direction,
+    }).catch((e) => {
+      console.log(e);
+    });
+  };
+
+  const onSwipeProfile = (
+    swiper_application_id: number,
+    swiped_username: string,
+    direction: "left" | "right"
+  ) => {
+    put(`${BASE_URL}/swipe/user`, {
+      application_id: swiper_application_id,
+      swiped_username: swiped_username,
+      direction: direction,
+    }).catch((e) => {
+      console.log(e);
+    });
+  };
+
   const onSwipedLeft = (cardIndex: number) => {
     // Call swipe left on api
     if (mode === "application") {
+      onSwipeApplication(
+        (cards[cardIndex] as ApplicationCard).application_id,
+        "left"
+      );
+    } else if (mode === "profile" && application_id) {
+      onSwipeProfile(
+        application_id,
+        (cards[cardIndex] as UserProfile).username,
+        "left"
+      );
     }
 
-    if (cardIndex === cards.length - 2) {
+    if (cardIndex >= cards.length - 3) {
       fetchData();
     }
   };
 
   const onSwipedRight = (cardIndex: number) => {
     // Call swipe right on api
-    if (cardIndex === cards.length - 2) {
+    if (mode === "application") {
+      onSwipeApplication(
+        (cards[cardIndex] as ApplicationCard).application_id,
+        "right"
+      );
+    } else if (mode === "profile" && application_id) {
+      onSwipeProfile(
+        application_id,
+        (cards[cardIndex] as UserProfile).username,
+        "right"
+      );
+    }
+
+    if (cardIndex >= cards.length - 3) {
       fetchData();
     }
   };
@@ -239,6 +306,9 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
           {card.skills.map((skill) => (
             <View key={skill.name} style={{ padding: 5 }}>
               <Unorderedlist bulletUnicode={0x2023}>
+                <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                  {skill.name}
+                </Text>
                 <Text style={{ fontSize: 15 }}>{skill.description}</Text>
               </Unorderedlist>
             </View>
@@ -250,6 +320,9 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
           {card.educations.map((education) => (
             <View key={education.name} style={{ padding: 5 }}>
               <Unorderedlist bulletUnicode={0x2023}>
+                <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                  {education.name}
+                </Text>
                 <Text style={{ fontSize: 15 }}>{education.description}</Text>
               </Unorderedlist>
             </View>
@@ -261,6 +334,9 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
           {card.experience.map((exp) => (
             <View key={exp.name} style={{ padding: 5 }}>
               <Unorderedlist bulletUnicode={0x2023}>
+                <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                  {exp.name}
+                </Text>
                 <Text style={{ fontSize: 15 }}>{exp.description}</Text>
               </Unorderedlist>
             </View>
