@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 import Swiper from "react-native-deck-swiper";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Unorderedlist from "react-native-unordered-list";
 import React from "react";
 import { get, put } from "../axios";
 import { BASE_URL } from "../Constants";
 import { useIsFocused } from "@react-navigation/native";
+import { showErrorToast } from "../components/toast";
 
 interface SwipeViewProps {
   mode: "profile" | "application";
@@ -201,9 +201,15 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
     put(`${BASE_URL}/swipe/application`, {
       application_id: application_id,
       direction: direction,
-    }).catch((e) => {
-      console.log(e);
-    });
+    })
+      .then((response) => {
+        if (response.data.matched) {
+          showErrorToast("YOU GOT A MATCH");
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   const onSwipeProfile = (
@@ -215,9 +221,15 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
       application_id: swiper_application_id,
       swiped_username: swiped_username,
       direction: direction,
-    }).catch((e) => {
-      console.log(e);
-    });
+    })
+      .then((response) => {
+        if (response.data.matched) {
+          showErrorToast("YOU GOT A MATCH");
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   const onSwipedLeft = (cardIndex: number) => {
@@ -363,27 +375,19 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
   };
 
   return (
-    <SafeAreaView style={{ display: "flex", flexDirection: "column" }}>
-      <View
-        style={{
-          display: "flex",
-          alignContent: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Swiper
-          ref={swiperRef}
-          cards={cards}
-          cardIndex={0}
-          verticalSwipe={false}
-          stackSize={3}
-          backgroundColor="#FFFFFF"
-          animateCardOpacity
-          renderCard={onRenderCard}
-          onSwipedLeft={onSwipedLeft}
-          onSwipedRight={onSwipedRight}
-        />
-      </View>
+    <SafeAreaView>
+      <Swiper
+        ref={swiperRef}
+        cards={cards}
+        cardIndex={0}
+        verticalSwipe={false}
+        stackSize={3}
+        backgroundColor="#FFFFFF"
+        animateCardOpacity
+        renderCard={onRenderCard}
+        onSwipedLeft={onSwipedLeft}
+        onSwipedRight={onSwipedRight}
+      />
     </SafeAreaView>
   );
 }
@@ -398,7 +402,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     borderRadius: 20,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "black",
     alignContent: "center",
     justifyContent: "flex-start",
