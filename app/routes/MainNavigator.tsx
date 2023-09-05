@@ -5,13 +5,13 @@ import { createMaterialBottomTabNavigator } from "@react-navigation/material-bot
 import { StyleSheet } from "react-native";
 import { Color } from "../Constants";
 import UserProfile from "../screens/UserProfile";
-import React, { useEffect, useState } from "react";
-import { useSelector } from 'react-redux';
+import React from "react";
+import { useSelector } from "react-redux";
+import CompanyNavigator from "./CompanyNavigator";
 
 const Tab = createMaterialBottomTabNavigator();
 
 function MainNavigator() {
-
   const username = useSelector((state) => state.auth.username);
 
   return (
@@ -40,6 +40,14 @@ function MainNavigator() {
             component={AccountNavigator}
           />
         )}
+        <Tab.Screen
+          name="CompanyNavigator"
+          options={{
+            tabBarIcon: "office-building",
+            tabBarLabel: "My companies",
+          }}
+          component={CompanyNavigator}
+        />
       </Tab.Navigator>
     </AuthProvider>
   );
@@ -50,6 +58,5 @@ const styles = StyleSheet.create({
     backgroundColor: Color.BLACK,
   },
 });
-
 
 export default MainNavigator;
