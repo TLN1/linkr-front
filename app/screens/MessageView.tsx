@@ -12,10 +12,11 @@ import { get, post, put } from "../axios";
 
 
 interface MessagesViewProps {
+  route: any,
   navigation: NativeStackNavigationProp<any, "Chat">;
 }
 
-const MessagesView = ({ navigation }: MessagesViewProps) => {
+const MessagesView = ({ route, navigation }: MessagesViewProps) => {
   const [me, setMe] = useState<string>("");
   const [recipient, setRecipient] = useState<string>("");
   const [messages, setMessages] = useState<MessageItem[]>([]);
@@ -24,22 +25,12 @@ const MessagesView = ({ navigation }: MessagesViewProps) => {
 
   useEffect(() => {
     async function getSocket() {
-      const userInfo = await AsyncStorage.getItem("userInfo");
-      const userInfoParsed = JSON.parse(userInfo);
-      console.log(userInfoParsed);
+      const userInfo = await AsyncStorage.getItem("username");
+      console.log(userinfo);
 
-      setMe(userInfoParsed.username);
-      console.log(userInfoParsed.username);
-      console.log(me);
-
-        if (userInfoParsed.username === "tamo") {
-          setRecipient("nini");
-        } else if (userInfoParsed.username === "nini") {
-          setRecipient("tamo");
-      }
+      setMe(userInfo);
+      setRecipient(route?.data?.recipient);
       console.log(recipient);
-
-
       if (me) {
         await get(`/chat/${recipient}`).then((response) => {
           console.log(response.data.message_list);

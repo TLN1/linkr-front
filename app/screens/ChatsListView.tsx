@@ -1,7 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, ScrollView, Text } from 'react-native'
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { get, post, put } from "../axios";
 
 import SingleChatEntry from '../components/chat/SingleChatEntry';
 
@@ -20,14 +23,33 @@ interface ChatItem {
 }
 
 interface Props {
-    navigation: NativeStackNavigationProp<any, "Profile">;
+    navigation: NativeStackNavigationProp<any, "My Chats">;
     route: any;
 }
 
 
 const ChatsListView = ({ navigation, route }: Props) => {
 
-    const [chats, setChats] = useState(route?.params?.chats);
+    const [chats, setChats] = useState([]);
+    const [username, setUsername] = useState();
+
+    useEffect(() => {
+
+        async function updateUserInfo() {
+            const userInfo = await AsyncStorage.getItem("userInfo");
+            setUsername(userInfo);
+        }
+
+
+        async function getUserChats() {
+            const response = await get("/chats");
+
+            console.log(response?.data);
+        }
+        updateUserInfo();
+        getUserChats();
+    },
+        []);
 
     return (
         <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
@@ -39,7 +61,7 @@ const ChatsListView = ({ navigation, route }: Props) => {
                     height: 70,
                 }}
             >
-                <Text style={{color: "white", fontSize: 30, fontWeight: "bold" }}>
+                <Text style={{ color: "white", fontSize: 30, fontWeight: "bold" }}>
                     {"Conversations"}
                 </Text>
             </View>
@@ -53,11 +75,16 @@ const ChatsListView = ({ navigation, route }: Props) => {
             </View>
             <ScrollView>
                 {chats.map((chat: any, index: number) => (
-                    <View key={index} >
+                    <TouchableOpacity key={index}
+                        onPress={() => {
+                            const recipient = username === chat.username1 ? chat.username2 : chat.username1;
+                            navigation.navigate("Chat", { recipient })
+
+                        }}>
                         <SingleChatEntry
                             chat={chat}
                         />
-                    </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
         </SafeAreaView>

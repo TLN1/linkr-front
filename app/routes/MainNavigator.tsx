@@ -10,32 +10,12 @@ import React from "react";
 import MessagesView from "../screens/MessageView";
 import ChatListView from "../screens/ChatsListView"
 import ConversationsScreen from "../screens/ChatsListView";
+import ChatNavigator from "./ChatNavigator";
 
 const Tab = createMaterialBottomTabNavigator();
 
-
-const dummyChats = [
-  {
-    chat_id: 1,
-    username1: "Alice",
-    username2: "Levan",
-    message_list: [
-      { user: "Alice", time: "10:00 AM", text: "Hi, Levan!" },
-      { user: "Bob", time: "10:05 AM", text: "Hello, Alice!" },
-    ],
-  },
-  {
-    chat_id: 2,
-    username1: "Eve",
-    username2: "Nini",
-    message_list: [
-      { user: "Eve", time: "11:30 AM", text: "Hey, Nini!" },
-      { user: "Charlie", time: "11:35 AM", text: "Hi, Eve!" },
-    ],
-  },
-];
-
 export default function MainNavigator() {
+
   let token = getAuthToken();
   console.log(token);
   return (
@@ -60,13 +40,14 @@ export default function MainNavigator() {
           options={{ tabBarIcon: "account", tabBarLabel: "Profile" }}
           component={UserProfile}
         />
-        <Tab.Screen name="Chat" component={MessagesView} />
         <Tab.Screen
-          name="ChatList"
-          component={ChatListView}
-          initialParams={{ chats: dummyChats }} 
+          name="ChatNavigator"
+          options={{
+            tabBarIcon: "",
+            tabBarLabel: "My Chats",
+          }}
+          component={ChatNavigator}
         />
-
       </Tab.Navigator>
     </AuthProvider>
   );

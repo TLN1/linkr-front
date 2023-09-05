@@ -40,7 +40,7 @@ const UserProfile = ({ navigation }: Props) => {
   const [addingItem, setAddingItem] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
 
-  const [username, setUsername] = useState("tamo");
+  const [username, setUsername] = useState();
 
   const [expreniences, setExperiences] = useState<Experience[]>([]);
 
@@ -68,8 +68,16 @@ const UserProfile = ({ navigation }: Props) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
+
+      const userInfo = await AsyncStorage.getItem("username");
+      console.log("IN PROFILE");
+      
+      console.log(userInfo);
+
+      setUsername(userInfo);
+
       try {
-        const response = await get(`/user/${username}`);
+        const response = await get(`/user/${userInfo}`);
         const userData = response.data;
 
         console.log(userData);
@@ -466,7 +474,7 @@ const UserProfile = ({ navigation }: Props) => {
       </View>
       <View style={{ padding: 10, marginLeft: "4%" }}>
         <Text style={{ fontSize: 30, fontWeight: "bold" }}>
-          {"User Name"}
+          {username}
         </Text>
       </View>
       <View style={{ flexDirection: 'row', marginLeft: '4%' }}>
