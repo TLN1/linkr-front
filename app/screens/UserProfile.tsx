@@ -13,7 +13,6 @@ import {
   SectionList,
   Button
 } from "react-native";
-import PreferenceDialog from "./PreferencesDialog";
 import { get, put } from "../axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -40,7 +39,6 @@ interface Props {
   navigation: NativeStackNavigationProp<any, "Profile">;
 }
 const UserProfile = ({ route, navigation }: Props) => {
-  const [isPreferenceModalVisible, setIsPreferenceModalVisible] = useState(false);
 
   const [addingItem, setAddingItem] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
@@ -71,39 +69,6 @@ const UserProfile = ({ route, navigation }: Props) => {
   const [currName, setCurrName] = useState<string>("");
   const [currDescription, setCurrDescription] = useState<string>("");
   const authContext = useContext(AuthContext);
-
-  const savePreferences = async (selectedIndustries: any, selectedJobLocations: any, 
-    selectedJobTypes: any, selectedExperienceLevels: any) => {
-    try {
-      const token = await AsyncStorage.getItem("authToken");
-      if (token) {
-        const accessToken = JSON.parse(token).access_token;
-
-        await put(
-          "/preferences/update",  
-          {
-            industry: selectedIndustries,
-            job_location: selectedJobLocations,
-            job_type: selectedJobTypes,
-            experience_level: selectedExperienceLevels
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-          );
-  
-      }
-    } catch (error) {
-      console.error("Error updating education:", error);
-    }
-    setIsPreferenceModalVisible(false);
-  };
-
-  const cancelPreferences = () => {
-    setIsPreferenceModalVisible(false);
-  }
 
   useEffect(() => {
     const fetchUserData = async (userName) => {
@@ -479,19 +444,12 @@ const UserProfile = ({ route, navigation }: Props) => {
             <View></View>
             <View></View>
           </Pressable>
-          <Pressable onPress={() => setIsPreferenceModalVisible(true)}>
+          <Pressable >
             <Image
               source={require('../assets/icon.png')}
               style={{ width: 30, height: 30 }}
             />
           </Pressable>
-          <Pressable
-            style={styles.preferenceButton}
-            onPress={() => setIsPreferenceModalVisible(true)}
-          >
-            <Text style={styles.preferenceButtonText}>Preferences</Text>
-          </Pressable>
-
 
         </View>
         <View
@@ -545,18 +503,6 @@ const UserProfile = ({ route, navigation }: Props) => {
         <View style={styles.modalContainer}>
           <AddItemDialog />
         </View>
-      </Modal>
-      <Modal
-        visible={isPreferenceModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsPreferenceModalVisible(false)}
-      >
-        {/* <Pressable onPressOut={() => setIsPreferenceModalVisible(false)}> */}
-        <View style={styles.modalContainer}>
-          <PreferenceDialog name={route?.params?.username} onSavePreferences={savePreferences} onCancel={cancelPreferences} />
-        </View>
-        {/* </Pressable> */}
       </Modal>
     </SafeAreaView>
   );
@@ -662,18 +608,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: "white",
     fontWeight: "bold",
-  },
-  preferenceButton: {
-    backgroundColor: 'black',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginLeft: 10,
-  },
-  preferenceButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
+  },  
   modalContainer: {
     flex: 1,
     justifyContent: "center",
