@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -18,6 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 export const JobApplication = (
   setVisible: any,
   company_id: number,
+  fetchCompanyData: any,
+  setIsLoading: any,
   application_id: number | null,
   action: (
     id: number,
@@ -92,11 +94,11 @@ export const JobApplication = (
       if (data?.location) {
         const location = data?.location;
         setJobLocation(location);
-        if (location === "on-site") {
+        if (location === "On-site") {
           setOnSiteChecked(true);
-        } else if (location === "remote") {
+        } else if (location === "Remote") {
           setRemoteChecked(true);
-        } else if (location === "hybrid") {
+        } else if (location === "Hybrid") {
           setHybridChecked(true);
         }
       }
@@ -104,9 +106,9 @@ export const JobApplication = (
       if (data?.job_type) {
         const type = data?.job_type;
         setJobType(type);
-        if (type === "part-time") {
+        if (type === "Part-time") {
           setPartTimeChecked(true);
-        } else if (type === "full-time") {
+        } else if (type === "Full-time") {
           setFullTimeChecked(true);
         }
       }
@@ -147,8 +149,8 @@ export const JobApplication = (
                 alignContent: "center",
                 justifyContent: "center",
                 flex: 1,
-                alignSelf: 'center',
-                paddingEnd: 0
+                alignSelf: "center",
+                paddingEnd: 0,
               }}
               onPress={() => setVisible(false)}
             />
@@ -186,7 +188,7 @@ export const JobApplication = (
                 color={onSiteChecked ? "black" : undefined}
                 onValueChange={(value) => {
                   if (value) {
-                    setJobLocation("on-site");
+                    setJobLocation("On-site");
                     setOnSiteChecked(true);
                     setRemoteChecked(false);
                     setHybridChecked(false);
@@ -202,7 +204,7 @@ export const JobApplication = (
                 color={remoteChecked ? "black" : undefined}
                 onValueChange={(value) => {
                   if (value) {
-                    setJobLocation("remote");
+                    setJobLocation("Remote");
                     setOnSiteChecked(false);
                     setRemoteChecked(true);
                     setHybridChecked(false);
@@ -218,7 +220,7 @@ export const JobApplication = (
                 color={hybridChecked ? "black" : undefined}
                 onValueChange={(value) => {
                   if (value) {
-                    setJobLocation("hybrid");
+                    setJobLocation("Hybrid");
                     setOnSiteChecked(false);
                     setRemoteChecked(false);
                     setHybridChecked(true);
@@ -236,7 +238,7 @@ export const JobApplication = (
                 color={partTimeChecked ? "black" : undefined}
                 onValueChange={(value) => {
                   if (value) {
-                    setJobType("part-time");
+                    setJobType("Part-time");
                     setPartTimeChecked(true);
                     setFullTimeChecked(false);
                   }
@@ -251,7 +253,7 @@ export const JobApplication = (
                 color={fullTimeChecked ? "black" : undefined}
                 onValueChange={(value) => {
                   if (value) {
-                    setJobType("full-time");
+                    setJobType("Full-time");
                     setPartTimeChecked(false);
                     setFullTimeChecked(true);
                   }
@@ -283,8 +285,9 @@ export const JobApplication = (
             <Button
               title="Save"
               color="black"
-              onPress={async () => {
-                await action(
+              onPress={() => {
+                setIsLoading(true);
+                action(
                   application_id ? application_id : company_id,
                   title,
                   experienceLevel,
@@ -292,9 +295,10 @@ export const JobApplication = (
                   jobLocation,
                   tagPickerState.tags.tagsArray,
                   description
-                ).then(res => {
-                  setVisible(false);
-                });
+                );
+                setIsLoading(false);
+                // setVisible(false);
+                fetchCompanyData(company_id);
               }}
             />
           </ScrollView>

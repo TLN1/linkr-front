@@ -1,4 +1,5 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import Spinner from "react-native-loading-spinner-overlay";
 import { useEffect, useState } from "react";
 import {
   Pressable,
@@ -18,9 +19,10 @@ import { JobApplicationListItem } from "../components/JobApplicationListItem";
 import { Ionicons } from "@expo/vector-icons";
 import { JobApplicationView } from "../components/JobApplicationView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import React from "react";
 
 interface Props {
-  id: number;
+  route: any;
   navigation: NativeStackNavigationProp<any, "Coompany">;
 }
 
@@ -74,6 +76,8 @@ const displayJobApplicationModal = (
   isVisible: boolean,
   setIsVisible: any,
   companyId: number,
+  fetchCompanyData: any,
+  setIsLoading: any,
   applicationId: number | null,
   action: (
     id: number,
@@ -94,7 +98,14 @@ const displayJobApplicationModal = (
     >
       <View>
         <View style={styles.modalContent}>
-          {JobApplication(setIsVisible, companyId, applicationId, action)}
+          {JobApplication(
+            setIsVisible,
+            companyId,
+            fetchCompanyData,
+            setIsLoading,
+            applicationId,
+            action
+          )}
         </View>
       </View>
     </Modal>
@@ -118,10 +129,11 @@ const saveJobApp = async (
     skills: skills,
     description: description,
     company_id: companyId,
-  }).then((res) => {
-    console.log(res);
-    // navigate
   });
+  // .then((res) => {
+  //   console.log(res);
+  //   // navigate
+  // });
 };
 
 const updateJobApp = async (
@@ -141,10 +153,11 @@ const updateJobApp = async (
     location: location,
     skills: skills,
     description: description,
-  }).then((res) => {
-    console.log(res);
-    // navigate
   });
+  // .then((res) => {
+  //   console.log(res);
+  //   // navigate
+  // });
 };
 
 interface Application {
@@ -157,16 +170,6 @@ interface Application {
   description: string;
 }
 
-const renderSectionHeader = ({
-  section: { title },
-}: {
-  section: { title: string };
-}) => (
-  <View>
-    <Text>{title}</Text>
-  </View>
-);
-
 const JobAppliationsTab = (
   applications: Application[],
   isAddVisible: boolean,
@@ -178,6 +181,7 @@ const JobAppliationsTab = (
   setViewModalVisible: any,
   myCompany: any
 ) => {
+  useEffect(() => {}, [applications]);
   return (
     <View style={{ flex: 1 }}>
       {/* <ScrollView> */}
@@ -215,30 +219,34 @@ const JobAppliationsTab = (
 /** <View>
       {applications?.map((application) => JobApplicationListItem(application))}
       </View> */
-const CompanyView = ({ id, navigation }: Props) => {
-  useEffect(() => {
-    async function fetchCompanyData(id: number) {
-      // Fetch data
-      const { data } = await get(`/company/${id}`);
+const CompanyView = ({ route, navigation }: Props) => {
+  const [id, setId] = useState(route?.params?.id);
+  const [refresh, setRefresh] = useState(false);
 
-      // Update the options state
-      setName(data?.name);
-      setWebsite(data?.website);
-      setIndustry(data?.industry);
-      setOrganizationSize(data?.organization_size);
-      setImage(data?.image_uri);
-      setCoverImage(data?.cover_image_uri);
-      setApplications(data?.applications);
+  async function fetchCompanyData(id: number) {
+    // Fetch data
+    console.log("REFRESH");
+    setIsLoading(true);
+    const { data } = await get(`/company/${id}`);
+    console.log("HERE");
+    // Update the options state
+    setName(data?.name);
+    setWebsite(data?.website);
+    setIndustry(data?.industry);
+    setOrganizationSize(data?.organization_size);
+    setImage(data?.image_uri);
+    setCoverImage(data?.cover_image_uri);
+    setApplications(data?.applications);
 
-      console.log(data?.owner_username);
-      var username = await AsyncStorage.getItem("username");
-      setMyCompany(data?.owner_username == username);
-      console.log(username);
-      console.log(myCompany);
-    }
-
-    if (id) fetchCompanyData(id);
-  }, []);
+    // console.log(data?.owner_username);
+    var username = await AsyncStorage.getItem("username");
+    setMyCompany(data?.owner_username == username);
+    setIsLoading(false);
+    setAddModalVisible(false);
+    setUpdateModalVisible(false);
+    // console.log(username);
+    // console.log(myCompany);
+  }
 
   const [name, setName] = useState("");
   const [website, setWebsite] = useState("");
@@ -265,9 +273,15 @@ const CompanyView = ({ id, navigation }: Props) => {
   );
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [myCompany, setMyCompany] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (id) fetchCompanyData(id);
+  }, [id]);
 
   return (
     <View style={{ backgroundColor: "white" }}>
+      <Spinner visible={isLoading} />
       {displayViewJobApplicaitonModal(
         viewApplicationId,
         viewModalVisible,
@@ -277,6 +291,8 @@ const CompanyView = ({ id, navigation }: Props) => {
         addModalVisible,
         setAddModalVisible,
         id,
+        fetchCompanyData,
+        setIsLoading,
         null,
         saveJobApp
       )}
@@ -284,6 +300,8 @@ const CompanyView = ({ id, navigation }: Props) => {
         updateModalVisible,
         setUpdateModalVisible,
         id,
+        fetchCompanyData,
+        setIsLoading,
         updateApplicationId,
         updateJobApp
       )}
