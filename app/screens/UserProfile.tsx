@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-virtualized-view";
 import { AuthContext } from "../context/Auth";
+import * as ImagePicker from "expo-image-picker";
 
 interface Education {
   name: string;
@@ -39,6 +40,7 @@ interface Props {
   navigation: NativeStackNavigationProp<any, "Profile">;
 }
 const UserProfile = ({ route, navigation }: Props) => {
+  const [hasGalleryPermission, setHasGalleryPermission] = useState(false);
   const [addingItem, setAddingItem] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
 
@@ -66,8 +68,44 @@ const UserProfile = ({ route, navigation }: Props) => {
   });
 
   const [currName, setCurrName] = useState<string>("");
+
+  const [image, setImage] = useState("");
+  const [coverImage, setCoverImage] = useState("");
+
   const [currDescription, setCurrDescription] = useState<string>("");
   const authContext = useContext(AuthContext);
+
+  const pickCoverImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      base64: true,
+      // aspect: [1, 1],
+      quality: 1,
+    });
+
+    // console.log(result);
+    if (!result.canceled) {
+      // console.log(result.assets[0]);
+      var filename = result.assets[0].fileName?.toLocaleLowerCase();
+      if (filename) {
+        var extension = filename?.substring(filename.lastIndexOf(".") + 1);
+        if (
+          extension === "jpg" ||
+          extension === "jpeg" ||
+          extension === "png"
+        ) {
+          let type =
+            extension === "jpg" || extension === "jpeg"
+              ? "image/jpeg"
+              : "image/png";
+          setCoverImage(`data:${type};base64,${result.assets[0].base64}`);
+        }
+      } else {
+        setCoverImage(result.assets[0].uri);
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async (userName) => {
@@ -91,6 +129,11 @@ const UserProfile = ({ route, navigation }: Props) => {
     };
 
     if (username) fetchUserData(username);
+    (async () => {
+      const galleryStatus =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      setHasGalleryPermission(galleryStatus.status === "granted");
+    })();
   }, [username]);
 
   const [myUser, setMyUser] = useState(false);
@@ -121,21 +164,16 @@ const UserProfile = ({ route, navigation }: Props) => {
     const token = await AsyncStorage.getItem("authToken");
     if (token) {
       const accessToken = JSON.parse(token).access_token;
-
-      await put(
-        "/user/update",
-        {
-          username: username,
-          education: educations,
-          skills: skills,
-          experience: [...expreniences, newExperience],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      console.log(image);
+      console.log(coverImage);
+      await put("/user/update", {
+        username: username,
+        image_uri: image,
+        cover_image_uri: coverImage,
+        education: educations,
+        skills: skills,
+        experience: [...expreniences, newExperience],
+      });
     }
 
     updateUser();
@@ -162,6 +200,8 @@ const UserProfile = ({ route, navigation }: Props) => {
       await put(
         "/user/update",
         {
+          image_uri: image,
+          cover_image_uri: coverImage,
           username: username,
           education: [...educations, newEducation],
           skills: skills,
@@ -196,6 +236,8 @@ const UserProfile = ({ route, navigation }: Props) => {
         "/user/update",
         {
           username: username,
+          image_uri: image,
+          cover_image: coverImage,
           education: educations,
           skills: [...skills, newSkill],
           experience: expreniences,
@@ -214,6 +256,36 @@ const UserProfile = ({ route, navigation }: Props) => {
     setCurrName("");
     setCurrDescription("");
     setDialogVisible(false);
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      base64: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      var filename = result.assets[0].fileName?.toLocaleLowerCase();
+      if (filename) {
+        var extension = filename?.substring(filename.lastIndexOf(".") + 1);
+        if (
+          extension === "jpg" ||
+          extension === "jpeg" ||
+          extension === "png"
+        ) {
+          let type =
+            extension === "jpg" || extension === "jpeg"
+              ? "image/jpeg"
+              : "image/png";
+          setImage(`data:${type};base64,${result.assets[0].base64}`);
+        }
+      } else {
+        setImage(result.assets[0].uri);
+      }
+    }
   };
 
   const renderEducationItem = ({ item }: { item: Education }) => (
@@ -429,34 +501,45 @@ const UserProfile = ({ route, navigation }: Props) => {
       <ScrollView style={{ backgroundColor: "white" }}>
         <View
           style={{
-            padding: 10,
             width: "100%",
             backgroundColor: "#000",
             height: 150,
           }}
         >
-          <Pressable>
+          <Pressable onPress={pickCoverImage}>
             <Image
-              source={require("../assets/icon.png")}
-              style={{ width: 30, height: 30 }}
+              source={
+                coverImage
+                  ? coverImage.length > 0
+                    ? { uri: coverImage }
+                    : require("../assets/empty_cover.jpeg")
+                  : require("../assets/empty_cover.jpeg")
+              }
+              style={{ width: Dimensions.get("window").width, height: 150 }}
             ></Image>
-            <View></View>
-            <View></View>
           </Pressable>
         </View>
-        <View
-          style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
-        >
-          <Image
-            source={require("../assets/icon.png")}
-            style={{
-              width: 140,
-              height: 140,
-              borderRadius: 100,
-              marginTop: -70,
-            }}
-          ></Image>
-        </View>
+        <Pressable onPress={pickImage}>
+          <View
+            style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
+          >
+            <Image
+              source={
+                image
+                  ? image.length > 0
+                    ? { uri: image }
+                    : require("../assets/blank-profile-circle.png")
+                  : require("../assets/blank-profile-circle.png")
+              }
+              style={{
+                width: 140,
+                height: 140,
+                borderRadius: 100,
+                marginTop: -70,
+              }}
+            ></Image>
+          </View>
+        </Pressable>
         <View style={{ padding: 10, marginLeft: "4%" }}>
           <Text style={{ fontSize: 30, fontWeight: "bold" }}>{username}</Text>
         </View>
