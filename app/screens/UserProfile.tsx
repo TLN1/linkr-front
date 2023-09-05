@@ -11,7 +11,7 @@ import {
   Modal,
   Dimensions,
   SectionList,
-  Button,
+  Button
 } from "react-native";
 import { get, put } from "../axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -510,6 +510,13 @@ const UserProfile = ({ route, navigation }: Props) => {
               style={{ width: Dimensions.get("window").width, height: 150 }}
             ></Image>
           </Pressable>
+          <Pressable >
+            <Image
+              source={require('../assets/icon.png')}
+              style={{ width: 30, height: 30 }}
+            />
+          </Pressable>
+
         </View>
         <Pressable onPress={pickImage}>
           <View
@@ -675,7 +682,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: "white",
     fontWeight: "bold",
-  },
+  },  
   modalContainer: {
     flex: 1,
     justifyContent: "center",
