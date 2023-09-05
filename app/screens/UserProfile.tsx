@@ -72,6 +72,39 @@ const UserProfile = ({ route, navigation }: Props) => {
   const [currDescription, setCurrDescription] = useState<string>("");
   const authContext = useContext(AuthContext);
 
+  const savePreferences = async (selectedIndustries: any, selectedJobLocations: any, 
+    selectedJobTypes: any, selectedExperienceLevels: any) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (token) {
+        const accessToken = JSON.parse(token).access_token;
+
+        await put(
+          "/preferences/update",  
+          {
+            industry: selectedIndustries,
+            job_location: selectedJobLocations,
+            job_type: selectedJobTypes,
+            experience_level: selectedExperienceLevels
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+          );
+  
+      }
+    } catch (error) {
+      console.error("Error updating education:", error);
+    }
+    setIsPreferenceModalVisible(false);
+  };
+
+  const cancelPreferences = () => {
+    setIsPreferenceModalVisible(false);
+  }
+
   useEffect(() => {
     const fetchUserData = async (userName) => {
       try {
@@ -261,34 +294,34 @@ const UserProfile = ({ route, navigation }: Props) => {
       item: Education | Skill | Experience;
     }) => JSX.Element;
   }[] = [
-    {
-      title: "Education",
-      data: educations,
-      renderItem: renderEducationItem as ({
-        item,
-      }: {
-        item: Education | Skill | Experience;
-      }) => JSX.Element,
-    },
-    {
-      title: "Skill",
-      data: skills,
-      renderItem: renderSkillsItem as ({
-        item,
-      }: {
-        item: Education | Skill | Experience;
-      }) => JSX.Element,
-    },
-    {
-      title: "Experience",
-      data: expreniences,
-      renderItem: renderExperienceItem as ({
-        item,
-      }: {
-        item: Education | Skill | Experience;
-      }) => JSX.Element,
-    },
-  ];
+      {
+        title: "Education",
+        data: educations,
+        renderItem: renderEducationItem as ({
+          item,
+        }: {
+          item: Education | Skill | Experience;
+        }) => JSX.Element,
+      },
+      {
+        title: "Skill",
+        data: skills,
+        renderItem: renderSkillsItem as ({
+          item,
+        }: {
+          item: Education | Skill | Experience;
+        }) => JSX.Element,
+      },
+      {
+        title: "Experience",
+        data: expreniences,
+        renderItem: renderExperienceItem as ({
+          item,
+        }: {
+          item: Education | Skill | Experience;
+        }) => JSX.Element,
+      },
+    ];
 
   const renderSectionHeader = ({
     section: { title },
@@ -447,10 +480,10 @@ const UserProfile = ({ route, navigation }: Props) => {
             <View></View>
           </Pressable>
           <Pressable onPress={() => setIsPreferenceModalVisible(true)}>
-          <Image
-            source={require('../assets/icon.png')}
-            style={{ width: 30, height: 30 }}
-          />
+            <Image
+              source={require('../assets/icon.png')}
+              style={{ width: 30, height: 30 }}
+            />
           </Pressable>
           <Pressable
             style={styles.preferenceButton}
@@ -519,13 +552,11 @@ const UserProfile = ({ route, navigation }: Props) => {
         transparent={true}
         onRequestClose={() => setIsPreferenceModalVisible(false)}
       >
-        {/* Render your PreferenceDialog component here */}
-
-        <Pressable onPressOut={() => setIsPreferenceModalVisible(false)}>
-          <View style={styles.modalContainer}>
-          <PreferenceDialog name={route?.params?.username}/>
-          </View>
-        </Pressable>
+        {/* <Pressable onPressOut={() => setIsPreferenceModalVisible(false)}> */}
+        <View style={styles.modalContainer}>
+          <PreferenceDialog name={route?.params?.username} onSavePreferences={savePreferences} onCancel={cancelPreferences} />
+        </View>
+        {/* </Pressable> */}
       </Modal>
     </SafeAreaView>
   );

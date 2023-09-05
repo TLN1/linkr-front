@@ -13,10 +13,12 @@ interface DropDownSchema {
 
 interface Props {
   name: string;
+  onSavePreferences: any,
+  onCancel: any,
   navigation: NativeStackNavigationProp<any, "Profile">;
 }
 
-const PreferenceDialog: React.FC = ({ name, navigation }: Props) => {
+const PreferenceDialog: React.FC = ({ name, onSavePreferences, onCancel, navigation }: Props) => {
 
   const [username, setUsername] = useState(name);
 
@@ -128,36 +130,11 @@ const PreferenceDialog: React.FC = ({ name, navigation }: Props) => {
     }, []);
 
   const savePreferences = async () => {
-    // Logic to save preferences
-    // You can send preferences to the server or store them locally
-    try {
-      const token = await AsyncStorage.getItem("authToken");
-      if (token) {
-        const accessToken = JSON.parse(token).access_token;
-
-        await put(
-          "/preferences/update",  
-          {
-            industry: selectedIndustries,
-            job_location: selectedJobLocations,
-            job_type: selectedJobTypes,
-            experience_level: selectedExperienceLevels
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-          );
-  
-      }
-    } catch (error) {
-      console.error("Error updating education:", error);
-    }
+    onSavePreferences(selectedIndustries, selectedJobLocations, selectedJobTypes, selectedExperienceLevels);
   };
 
   const cancel = () => {
-   
+   onCancel();
   };
 
   return (
