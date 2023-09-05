@@ -1,15 +1,21 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Unorderedlist from "react-native-unordered-list";
 import React from "react";
+import { get, post } from "../axios";
+import { BASE_URL } from "../Constants";
+import { useIsFocused } from "@react-navigation/native";
 
 interface SwipeViewProps {
   mode: "profile" | "application";
+  application_id?: number;
 }
 
-interface ApplicationCard {
+class Card {}
+
+interface ApplicationCard extends Card {
   title: string;
   location: string;
   job_type: string;
@@ -17,6 +23,20 @@ interface ApplicationCard {
   skills: string[];
   description: string;
 }
+
+interface NameDescription {
+  name: string;
+  description: string;
+}
+
+interface UserProfile extends Card {
+  username: string;
+  skills: NameDescription[];
+  educations: NameDescription[];
+  experience: NameDescription[];
+}
+
+const STACK_SIZE = 10;
 
 const CARDS: ApplicationCard[] = [
   {
@@ -53,45 +73,140 @@ const CARDS: ApplicationCard[] = [
   },
 ];
 
-export default function SwipeView({ mode }: SwipeViewProps) {
-  const swiperRef = useRef<Swiper<ApplicationCard>>(null);
-  const [cards, setCards] = useState<ApplicationCard[]>(CARDS);
+const PROFILES: UserProfile[] = [
+  {
+    username: "gela",
+    educations: [
+      {
+        name: "freeuni",
+        description: "bachelor MACS",
+      },
+      {
+        name: "154 school",
+        description: "school ",
+      },
+    ],
+    skills: [
+      {
+        name: "cooking",
+        description: "css",
+      },
+      {
+        name: "baking",
+        description: "html",
+      },
+    ],
+    experience: [
+      {
+        name: "lambda gaming",
+        description: "cudi",
+      },
+    ],
+  },
+  {
+    username: "levani",
+    educations: [
+      {
+        name: "freeuni",
+        description: "bachelor MACS",
+      },
+      {
+        name: "154 school",
+        description: "school ",
+      },
+    ],
+    skills: [],
+    experience: [],
+  },
+];
+
+export default function SwipeView({ mode, application_id }: SwipeViewProps) {
+  const isFocused = useIsFocused();
+  const swiperRef = useRef<Swiper<Card>>(null);
+  const [cards, setCards] = useState<Card[]>([]);
 
   const fetchData = async () => {
+    console.log("FETCHING DATA");
+
+    if (mode === "application") {
+      get(`${BASE_URL}/swipe/list/applications`, {
+        params: {
+          amount: STACK_SIZE,
+        },
+      })
+        .then((res) => {
+          const swipe_list: any[] = res.data.swipe_list;
+          const newData = swipe_list.map((val) => {
+            const appCard: ApplicationCard = {
+              title: val.title,
+              description: val.description,
+              experience_level: val.experience_level,
+              job_type: val.job_type,
+              location: val.location,
+              skills: val.skills,
+            };
+
+            return appCard;
+          });
+
+          setCards([...cards, ...newData]);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    } else if (mode === "profile" && application_id) {
+      get(`${BASE_URL}/swipe/list/users`, {
+        params: {
+          amount: STACK_SIZE,
+          swiper_application_id: application_id,
+        },
+      })
+        .then((res) => {
+          console.log(res.data.swipe_list);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
     // const newData = OTHER;
     // setCards([...cards, ...newData]);
   };
 
+  useEffect(() => {
+    fetchData();
+  }, [isFocused]);
+
   const onSwipedLeft = (cardIndex: number) => {
     // Call swipe left on api
-    // if (cardIndex === cards.length - 2) {
-    //   setCards([...cards, ...OTHER]);
-    // }
-    console.log("Left " + cardIndex);
+    if (mode === "application") {
+    }
+
+    if (cardIndex === cards.length - 2) {
+      fetchData();
+    }
   };
 
   const onSwipedRight = (cardIndex: number) => {
     // Call swipe right on api
-    // if (cardIndex === cards.length - 2) {
-    //   setCards([...cards, ...OTHER]);
-    // }
-    console.log("Right " + cardIndex);
+    if (cardIndex === cards.length - 2) {
+      fetchData();
+    }
   };
 
-  const onRenderCard = (card: ApplicationCard) => {
+  const onRenderApplicationCard = (card: ApplicationCard) => {
     return (
       <View style={styles.card}>
         <Text style={styles.cardTitle}>{card.title}</Text>
         <View style={styles.cardRow}>
-          <Text style={styles.cardLabel}>Experience level:</Text>
+          <Text style={styles.cardLabel}>Experience Level:</Text>
           <Text style={styles.cardLabelSmall}>{card.experience_level}</Text>
         </View>
         <View style={styles.cardRow}>
-          <Text style={styles.cardLabel}>Job location:</Text>
+          <Text style={styles.cardLabel}>Job Location:</Text>
           <Text style={styles.cardLabelSmall}>{card.location}</Text>
         </View>
         <View style={styles.cardRow}>
-          <Text style={styles.cardLabel}>Job type:</Text>
+          <Text style={styles.cardLabel}>Job Type:</Text>
           <Text style={styles.cardLabelSmall}>{card.job_type}</Text>
         </View>
 
@@ -114,6 +229,63 @@ export default function SwipeView({ mode }: SwipeViewProps) {
     );
   };
 
+  const onRenderUserProfile = (card: UserProfile) => {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>{card.username}</Text>
+
+        <Text style={styles.cardLabel}>Skills:</Text>
+        <View>
+          {card.skills.map((skill) => (
+            <View key={skill.name} style={{ padding: 5 }}>
+              <Unorderedlist bulletUnicode={0x2023}>
+                <Text style={{ fontSize: 15 }}>{skill.description}</Text>
+              </Unorderedlist>
+            </View>
+          ))}
+        </View>
+
+        <Text style={styles.cardLabel}>Educations:</Text>
+        <View>
+          {card.educations.map((education) => (
+            <View key={education.name} style={{ padding: 5 }}>
+              <Unorderedlist bulletUnicode={0x2023}>
+                <Text style={{ fontSize: 15 }}>{education.description}</Text>
+              </Unorderedlist>
+            </View>
+          ))}
+        </View>
+
+        <Text style={styles.cardLabel}>Experience:</Text>
+        <View>
+          {card.experience.map((exp) => (
+            <View key={exp.name} style={{ padding: 5 }}>
+              <Unorderedlist bulletUnicode={0x2023}>
+                <Text style={{ fontSize: 15 }}>{exp.description}</Text>
+              </Unorderedlist>
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  const onRenderCard = (c: Card) => {
+    if (!c) {
+      return <></>;
+    }
+
+    let card;
+
+    if ("job_type" in c) {
+      card = c as ApplicationCard;
+      return onRenderApplicationCard(card);
+    } else {
+      card = c as UserProfile;
+      return onRenderUserProfile(card);
+    }
+  };
+
   return (
     <SafeAreaView style={{ display: "flex", flexDirection: "column" }}>
       <View
@@ -128,12 +300,8 @@ export default function SwipeView({ mode }: SwipeViewProps) {
           cards={cards}
           cardIndex={0}
           verticalSwipe={false}
-          overlayLabels={overlayLabels}
           stackSize={3}
-          infinite // TODO: remove infinite later
           backgroundColor="#FFFFFF"
-          overlayLabelWrapperStyle={styles.overlayLabelStyle}
-          animateOverlayLabelsOpacity
           animateCardOpacity
           renderCard={onRenderCard}
           onSwipedLeft={onSwipedLeft}
@@ -153,16 +321,18 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     flexDirection: "column",
-    borderRadius: 10,
+    borderRadius: 20,
     borderWidth: 2,
-    borderColor: "#E8E8E8",
+    borderColor: "black",
     alignContent: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     backgroundColor: "white",
   },
   cardTitle: {
     textAlign: "center",
-    fontSize: 30,
+    justifyContent: "flex-start",
+    fontSize: 40,
+    fontWeight: "bold",
     backgroundColor: "transparent",
   },
   cardRow: {
@@ -172,7 +342,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
   },
   cardLabel: {
-    padding: 8,
+    padding: 12,
     fontSize: 20,
     color: "grey",
     fontWeight: "bold",
@@ -180,62 +350,7 @@ const styles = StyleSheet.create({
   },
   cardLabelSmall: {
     fontSize: 15,
-    padding: 8,
+    padding: 12,
     alignSelf: "baseline",
   },
-  done: {
-    textAlign: "center",
-    fontSize: 30,
-    color: "white",
-    backgroundColor: "transparent",
-  },
-  overlayLabelStyle: {
-    position: "absolute",
-    backgroundColor: "transparent",
-    zIndex: 2,
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
 });
-
-const overlayLabels = {
-  left: {
-    element: <Text>NOPE</Text>,
-    title: "NOPE",
-    style: {
-      label: {
-        backgroundColor: "black",
-        borderColor: "black",
-        color: "white",
-        borderWidth: 1,
-      },
-      wrapper: {
-        flexDirection: "column",
-        alignItems: "flex-end",
-        justifyContent: "flex-start",
-        marginTop: 30,
-        marginLeft: -30,
-      },
-    },
-  },
-  right: {
-    element: <Text>LIKE</Text>,
-    title: "LIKE",
-    style: {
-      label: {
-        backgroundColor: "black",
-        borderColor: "black",
-        color: "white",
-        borderWidth: 1,
-      },
-      wrapper: {
-        flexDirection: "column",
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
-        marginTop: 30,
-        marginLeft: 30,
-      },
-    },
-  },
-};

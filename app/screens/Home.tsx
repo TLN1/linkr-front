@@ -5,7 +5,7 @@ import SwipeView from "./SwipeView";
 const Stack = createNativeStackNavigator();
 
 function Home() {
-  return <SwipeView />;
+  return <SwipeView mode="profile" application_id={1} />;
 }
 
 export default function HomeNavigator() {
