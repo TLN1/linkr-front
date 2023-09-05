@@ -134,7 +134,7 @@ const PreferenceDialog: React.FC = ({ name, onSavePreferences, onCancel, navigat
   };
 
   const cancel = () => {
-   onCancel();
+   onCancel()
   };
 
   return (

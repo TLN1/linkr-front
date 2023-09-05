@@ -4,8 +4,14 @@ import React = require("react");
 import { Button, Dimensions, Modal, Pressable, Switch, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import PreferenceDialog from "./PreferencesDialog";
+import JobApplicationSelector from "./JobApplicationSelector";
+
 import { get, put } from "../axios";
 import { useSelector } from "react-redux";
+import { set } from "react-native-reanimated";
+import { useEffect } from "react";
+
+
 
 interface Props {
     navigation: NativeStackNavigationProp<any, "Homescreen">;
@@ -15,6 +21,9 @@ const HomeScreen = ({ navigation }: Props) => {
     const username = useSelector((state) => state.auth.username);
 
     const [isPreferenceModalVisible, setIsPreferenceModalVisible] = React.useState(false);
+    const [isJobSelectorVisible, setIsJobSelectorVisible] = React.useState(false);
+    const [buttonType, setButtonType] = React.useState("for user");
+    const [switchState, setSwitchState] = React.useState(false)
 
     const savePreferences = async (selectedIndustries: any, selectedJobLocations: any,
         selectedJobTypes: any, selectedExperienceLevels: any) => {
@@ -47,7 +56,12 @@ const HomeScreen = ({ navigation }: Props) => {
 
     const cancelPreferences = () => {
         setIsPreferenceModalVisible(false);
+        setIsJobSelectorVisible(false);
     }
+
+    useEffect(() => {
+        
+    }, [buttonType]);
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -55,8 +69,21 @@ const HomeScreen = ({ navigation }: Props) => {
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                     {username && (
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                            <Button title="Preferences" onPress={() => setIsPreferenceModalVisible(true)} />
-                            <Switch value={false} onValueChange={(value) => console.log("Switch Toggled:", value)} />
+                            {buttonType === "for user" &&
+                                <Button title="Preferences" onPress={() => setIsPreferenceModalVisible(true)} />
+                            }
+                            {buttonType === "for company" &&
+                                <Button title="Job app selector" onPress={() => setIsJobSelectorVisible(true)} />
+                            }
+                            <Switch value={switchState} onValueChange={(value) => {
+                                if (buttonType === "for user"){
+                                    setButtonType("for company");
+                                    setSwitchState(true);
+                                } else if (buttonType === "for company"){
+                                    setButtonType("for user")
+                                    setSwitchState(false);
+                                }
+                            }} />
                         </View>
                     )}
                 </View>
@@ -74,6 +101,19 @@ const HomeScreen = ({ navigation }: Props) => {
                     width: "100%", maxHeight: Dimensions.get("window").height,
                 }}>
                     <PreferenceDialog name={username} onSavePreferences={savePreferences} onCancel={cancelPreferences} />
+                </View>
+            </Modal>
+            <Modal
+                visible={isJobSelectorVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setIsJobSelectorVisible(false)}
+            >
+                <View style={{
+                    flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    width: "100%", maxHeight: Dimensions.get("window").height,
+                }}>
+                    <JobApplicationSelector name={username} onCancel={cancelPreferences} />
                 </View>
             </Modal>
         </SafeAreaView >
