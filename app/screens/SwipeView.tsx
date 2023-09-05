@@ -155,6 +155,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
             return appCard;
           });
 
+          console.log(newData);
           setCards([...cards, ...newData]);
         })
         .catch((e) => {
@@ -182,6 +183,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
             return profileCard;
           });
 
+          console.log(newData);
           setCards([...cards, ...newData]);
         })
         .catch((e) => {
@@ -191,6 +193,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
   };
 
   useEffect(() => {
+    setCards([]);
     fetchData();
   }, [isFocused, mode]);
 
