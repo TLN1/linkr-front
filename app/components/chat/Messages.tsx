@@ -43,7 +43,7 @@ const Messages: React.FC<ChatMessagesProps> = ({ me, messageList }) => {
             </Text>
           </View>
         </View>
-
+        
       ))}
     </ScrollView>
   );
@@ -62,8 +62,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingHorizontal: 12,
     marginHorizontal: 12,
-    paddingTop: 5,
-    paddingBottom: 12,
+    paddingTop: 10,
+    paddingBottom: 24,
   },
   messageContainer: {
     alignSelf: "flex-start",
@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
     maxWidth: "80%",
     paddingHorizontal: 12,
     marginHorizontal: 12,
-    paddingTop: 5,
-    paddingBottom: 12,
+    paddingTop: 10,
+    paddingBottom: 24,
   },
   messageView: {
     backgroundColor: "transparent",

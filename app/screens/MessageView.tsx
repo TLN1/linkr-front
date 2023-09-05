@@ -17,33 +17,35 @@ interface MessagesViewProps {
 
 const MessagesView = ({ navigation }: MessagesViewProps) => {
   const [me, setMe] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
+  const [recipient, setRecipient] = useState<string>("");
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [message, setMessage] = useState<string>("");
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     async function getSocket() {
-      AsyncStorage.getItem("userInfo").then((userInfo) => {
-        const userInfoParsed = JSON.parse(userInfo);
-        console.log(userInfoParsed);
+      const userInfo = await AsyncStorage.getItem("userInfo");
+      const userInfoParsed = JSON.parse(userInfo);
+      console.log(userInfoParsed);
 
-        setMe(userInfoParsed.username);
+      setMe(userInfoParsed.username);
+      console.log(userInfoParsed.username);
+      console.log(me);
 
         if (userInfoParsed.username === "tamo") {
-          setUsername("nini");
+          setRecipient("nini");
         } else if (userInfoParsed.username === "nini") {
-          setUsername("tamo");
-        }
-        console.log(username);
-      });
+          setRecipient("tamo");
+      }
+      console.log(recipient);
+
 
       if (me) {
-        await get(`/chat/${username}`).then((response) => {
+        await get(`/chat/${recipient}`).then((response) => {
           console.log(response.data.message_list);
           const messageList = response.data.message_list;
           setMessages([]);
-          messageList.map((message: any) => (            
+          messageList.map((message: any) => (
             setMessages((prevMessages: any) => [...prevMessages, {
               user: message.sender_username,
               time: message.time,
@@ -63,21 +65,23 @@ const MessagesView = ({ navigation }: MessagesViewProps) => {
       }
 
     }
+    
     getSocket();
   }, [message]);
 
 
   const sendMessage = () => {
     console.log("send");
-    console.log(username);
-    if (wsRef.current !== null) wsRef.current.send(JSON.stringify({ "user": username, "time": "12:00", "text": message }));
+    console.log(recipient);
+    if (wsRef.current !== null) wsRef.current.send(JSON.stringify({ "user": recipient, "time": "12:00", "text": message }));
+    // setMessage("");
   };
 
 
   return (
     <View style={{ flex: 1 }}>
       <ChatHeader
-        username={username}
+        username={recipient}
       />
       <Messages
         me={me}
