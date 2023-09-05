@@ -131,7 +131,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
   const [cards, setCards] = useState<Card[]>([]);
 
   const fetchData = () => {
-    console.log("FETCHING DATA");
+    console.log(`FETCHING DATA ${mode} ${application_id}`);
 
     if (mode === "application") {
       get("/swipe/list/applications", {
@@ -192,7 +192,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isFocused, mode]);
 
   const onSwipeApplication = (
     application_id: number,

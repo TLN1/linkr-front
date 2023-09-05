@@ -77,10 +77,10 @@ const HomeScreen = ({ navigation }: Props) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <SwipeView
-        mode={switchState ? "application" : "profile"}
+        mode={switchState ? "profile" : "application"}
         application_id={jobAppId}
       />
-      {/* <View style={{ height: 50, backgroundColor: "white" }}>
+      <View style={{ height: 50, backgroundColor: "white" }}>
         <View
           style={{
             flexDirection: "row",
@@ -169,7 +169,7 @@ const HomeScreen = ({ navigation }: Props) => {
             onCancel={cancelPreferences}
           />
         </View>
-      </Modal> */}
+      </Modal>
     </SafeAreaView>
   );
 };
