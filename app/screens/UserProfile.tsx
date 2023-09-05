@@ -114,7 +114,6 @@ const UserProfile = ({ route, navigation }: Props) => {
         const response = await get(`/user/${userName}`);
         const userData = response.data;
 
-        console.log(userData);
         console.log(response.data?.username);
 
         setEducations(userData.education || []);
@@ -139,12 +138,9 @@ const UserProfile = ({ route, navigation }: Props) => {
   const [myUser, setMyUser] = useState(false);
 
   const updateUser = async () => {
-    console.log("ERGEFVKDNSJVBSDJCSLDNCLJDSBCBSDLCS");
     const response = await get(`/user/${username}`);
     const userData = response.data;
 
-    console.log("RECEIVE USER DATA ");
-    console.log(userData);
 
     console.log(response.data?.username);
 
@@ -152,7 +148,8 @@ const UserProfile = ({ route, navigation }: Props) => {
     setExperiences(userData.experience || []);
     setSkills(userData.skills || []);
     setUsername(userData.username || "");
-    console.log("EXPPPP : " + expreniences);
+    setImage(userData?.image_uri);
+    setCoverImage(userData?.cover_image_uri);
   };
 
   const handleSaveExperience = async () => {
@@ -161,20 +158,15 @@ const UserProfile = ({ route, navigation }: Props) => {
     newExperience.description = currDescription;
     setNewExperience(newExperience);
 
-    const token = await AsyncStorage.getItem("authToken");
-    if (token) {
-      const accessToken = JSON.parse(token).access_token;
-      console.log(image);
-      console.log(coverImage);
-      await put("/user/update", {
-        username: username,
-        image_uri: image,
-        cover_image_uri: coverImage,
-        education: educations,
-        skills: skills,
-        experience: [...expreniences, newExperience],
-      });
-    }
+    await put("/user/update", {
+      username: username,
+      image_uri: image,
+      cover_image_uri: coverImage,
+      education: educations,
+      skills: skills,
+      experience: [...expreniences, newExperience],
+    });
+
 
     updateUser();
 
@@ -330,34 +322,34 @@ const UserProfile = ({ route, navigation }: Props) => {
       item: Education | Skill | Experience;
     }) => JSX.Element;
   }[] = [
-    {
-      title: "Education",
-      data: educations,
-      renderItem: renderEducationItem as ({
-        item,
-      }: {
-        item: Education | Skill | Experience;
-      }) => JSX.Element,
-    },
-    {
-      title: "Skill",
-      data: skills,
-      renderItem: renderSkillsItem as ({
-        item,
-      }: {
-        item: Education | Skill | Experience;
-      }) => JSX.Element,
-    },
-    {
-      title: "Experience",
-      data: expreniences,
-      renderItem: renderExperienceItem as ({
-        item,
-      }: {
-        item: Education | Skill | Experience;
-      }) => JSX.Element,
-    },
-  ];
+      {
+        title: "Education",
+        data: educations,
+        renderItem: renderEducationItem as ({
+          item,
+        }: {
+          item: Education | Skill | Experience;
+        }) => JSX.Element,
+      },
+      {
+        title: "Skill",
+        data: skills,
+        renderItem: renderSkillsItem as ({
+          item,
+        }: {
+          item: Education | Skill | Experience;
+        }) => JSX.Element,
+      },
+      {
+        title: "Experience",
+        data: expreniences,
+        renderItem: renderExperienceItem as ({
+          item,
+        }: {
+          item: Education | Skill | Experience;
+        }) => JSX.Element,
+      },
+    ];
 
   const renderSectionHeader = ({
     section: { title },

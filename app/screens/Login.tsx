@@ -4,6 +4,7 @@ import { AuthContext } from "../context/Auth";
 import Spinner from "react-native-loading-spinner-overlay";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import TlnButton from "../components/TlnButton";
+import WebSocketSingleton from "../WebSocketSingleton";
 import { showErrorToast } from "../components/toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
@@ -67,6 +68,12 @@ function Helper({ navigation, register }: HelperProps) {
     //   console.log(loggedInUser);
     //   // navigation.navigate("User Profile", { username: loggedInUser });
     // }
+    
+    const websocketUrl = `ws://127.0.0.1:8000/register/ws/${username}`;
+    const ws = WebSocketSingleton.getWebSocket(username, websocketUrl);
+    ws.onopen = () => {
+      console.log(`WebSocket connection opened for user ${username}`);
+    };
   };
 
   const onChangeInputText = (value: string, type: "username" | "password") => {
