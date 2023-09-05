@@ -20,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { JobApplicationView } from "../components/JobApplicationView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
+import { useIsFocused } from "@react-navigation/native";
 
 interface Props {
   route: any;
@@ -52,9 +53,9 @@ const AboutTab = (
 };
 
 const displayViewJobApplicaitonModal = (
-  applicationId,
-  isVisible,
-  setModelVisible
+  applicationId: number | null,
+  isVisible: boolean,
+  setModelVisible: any
 ) => {
   return (
     <Modal
@@ -73,12 +74,16 @@ const displayViewJobApplicaitonModal = (
 };
 
 const displayJobApplicationModal = (
+  applications: Application[],
+  setApplications: any,
   isVisible: boolean,
   setIsVisible: any,
   companyId: number,
   fetchCompanyData: any,
   setIsLoading: any,
   applicationId: number | null,
+  refresh: boolean,
+  setRefresh: any,
   action: (
     id: number,
     title: string,
@@ -87,7 +92,7 @@ const displayJobApplicationModal = (
     location: string,
     skills: string[],
     description: string
-  ) => void
+  ) => Promise<any>
 ) => {
   return (
     <Modal
@@ -99,12 +104,16 @@ const displayJobApplicationModal = (
       <View>
         <View style={styles.modalContent}>
           {JobApplication(
+            applications,
+            setApplications,
             setIsVisible,
             companyId,
             fetchCompanyData,
             setIsLoading,
             applicationId,
-            action
+            action,
+            refresh,
+            setRefresh
           )}
         </View>
       </View>
@@ -112,7 +121,7 @@ const displayJobApplicationModal = (
   );
 };
 
-const saveJobApp = async (
+const saveJobApp = (
   companyId: number,
   title: string,
   experienceLevel: string,
@@ -121,7 +130,7 @@ const saveJobApp = async (
   skills: string[],
   description: string
 ) => {
-  await post("/application", {
+  return post("/application", {
     title: title,
     experience_level: experienceLevel,
     job_type: type,
@@ -136,7 +145,7 @@ const saveJobApp = async (
   // });
 };
 
-const updateJobApp = async (
+const updateJobApp = (
   applicationId: number,
   title: string,
   experienceLevel: string,
@@ -145,7 +154,7 @@ const updateJobApp = async (
   skills: string[],
   description: string
 ) => {
-  await put(`/application/${applicationId}/update`, {
+  return put(`/application/${applicationId}/update`, {
     id: applicationId,
     title: title,
     experience_level: experienceLevel,
@@ -179,9 +188,15 @@ const JobAppliationsTab = (
   setIsUpdateVisible: any,
   setViewApplicationId: any,
   setViewModalVisible: any,
-  myCompany: any
+  myCompany: any,
+  refresh: boolean,
+  setRefresh: any,
 ) => {
-  useEffect(() => {}, [applications]);
+  // const [refresh, setRefresh] = useState(false);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {}, [refresh, applications, isFocused]);
+
   return (
     <View style={{ flex: 1 }}>
       {/* <ScrollView> */}
@@ -206,7 +221,9 @@ const JobAppliationsTab = (
               setViewModalVisible,
               setUpdateApplicationId,
               setIsUpdateVisible,
-              myCompany
+              myCompany,
+              refresh,
+              setRefresh,
             )
           }
           keyExtractor={(item, index) => index.toString()}
@@ -221,14 +238,13 @@ const JobAppliationsTab = (
       </View> */
 const CompanyView = ({ route, navigation }: Props) => {
   const [id, setId] = useState(route?.params?.id);
+  const isFocused = useIsFocused();
   const [refresh, setRefresh] = useState(false);
 
   async function fetchCompanyData(id: number) {
     // Fetch data
-    console.log("REFRESH");
     setIsLoading(true);
     const { data } = await get(`/company/${id}`);
-    console.log("HERE");
     // Update the options state
     setName(data?.name);
     setWebsite(data?.website);
@@ -277,7 +293,7 @@ const CompanyView = ({ route, navigation }: Props) => {
 
   useEffect(() => {
     if (id) fetchCompanyData(id);
-  }, [id]);
+  }, [id, isFocused, refresh]);
 
   return (
     <View style={{ backgroundColor: "white" }}>
@@ -288,21 +304,29 @@ const CompanyView = ({ route, navigation }: Props) => {
         setViewModalVisible
       )}
       {displayJobApplicationModal(
+        applications,
+        setApplications,
         addModalVisible,
         setAddModalVisible,
         id,
         fetchCompanyData,
         setIsLoading,
         null,
+        refresh,
+        setRefresh,
         saveJobApp
       )}
       {displayJobApplicationModal(
+        applications,
+        setApplications,
         updateModalVisible,
         setUpdateModalVisible,
         id,
         fetchCompanyData,
         setIsLoading,
         updateApplicationId,
+        refresh,
+        setRefresh,
         updateJobApp
       )}
       <View
@@ -314,9 +338,11 @@ const CompanyView = ({ route, navigation }: Props) => {
       >
         <Pressable>
           <Image
-            source={{
-              uri: coverImage,
-            }}
+            source={coverImage
+              ? coverImage.length > 0
+                ? { uri: image }
+                : require("../assets/empty_cover.jpeg")
+              : require("../assets/empty_cover.jpeg")}
             style={{ width: Dimensions.get("window").width, height: 150 }}
           ></Image>
           <View></View>
@@ -325,9 +351,13 @@ const CompanyView = ({ route, navigation }: Props) => {
       </View>
       <View style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}>
         <Image
-          source={{
-            uri: image,
-          }}
+          source={
+            image
+                  ? image.length > 0
+                    ? { uri: image }
+                    : require("../assets/empty.jpeg")
+                  : require("../assets/empty.jpeg")
+                }
           style={{
             width: 140,
             height: 140,
@@ -357,7 +387,9 @@ const CompanyView = ({ route, navigation }: Props) => {
                 setUpdateModalVisible,
                 setViewApplicationId,
                 setViewModalVisible,
-                myCompany
+                myCompany,
+                refresh,
+                setRefresh
               ),
           })}
           onIndexChange={(index) => setTabViewIndex(index)}

@@ -2,6 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { del } from "../axios";
 import React from "react";
+import { showSuccessToast } from "./toast";
 
 interface Company {
   id: number;
@@ -14,8 +15,11 @@ interface Company {
 export function CompanyListItem(
   company: any,
   myCompany: boolean,
-  navigation: any
+  navigation: any,
+  refresh: boolean,
+  setRefresh: any
 ) {
+
   return (
     <View>
       <Pressable
@@ -74,6 +78,8 @@ export function CompanyListItem(
                   await del(`/company/${company?.item?.id}`)
                     .then((res) => {
                       console.log("deleted");
+                      setRefresh(!refresh);
+                      showSuccessToast("Company deleted");
                     })
                     .catch((e) => {
                       console.log(e);

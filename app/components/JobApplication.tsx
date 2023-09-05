@@ -16,6 +16,8 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { Ionicons } from "@expo/vector-icons";
 
 export const JobApplication = (
+  applications: any [],
+  setApplications: any,
   setVisible: any,
   company_id: number,
   fetchCompanyData: any,
@@ -29,7 +31,9 @@ export const JobApplication = (
     location: string,
     skills: string[],
     description: string
-  ) => void
+  ) => Promise<any>,
+  refresh: boolean,
+  setRefresh: any 
 ) => {
   const [onSiteChecked, setOnSiteChecked] = useState(false);
   const [remoteChecked, setRemoteChecked] = useState(false);
@@ -285,9 +289,9 @@ export const JobApplication = (
             <Button
               title="Save"
               color="black"
-              onPress={() => {
+              onPress={async () => {
                 setIsLoading(true);
-                action(
+                await action(
                   application_id ? application_id : company_id,
                   title,
                   experienceLevel,
@@ -298,7 +302,7 @@ export const JobApplication = (
                 );
                 setIsLoading(false);
                 // setVisible(false);
-                fetchCompanyData(company_id);
+                setRefresh(!refresh);
               }}
             />
           </ScrollView>

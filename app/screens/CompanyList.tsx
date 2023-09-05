@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { get } from "../axios";
 import { CompanyListItem } from "../components/CompanyListItem";
+import { useIsFocused } from "@react-navigation/native";
 
 interface Props {
   route: any;
@@ -13,7 +14,9 @@ interface Props {
 
 export const CompanyList = ({ route, navigation }: Props) => {
   const [companies, setCompanies] = useState([]);
-
+  const isFocused = useIsFocused();
+  const [refresh, setRefresh] = useState(false);
+  
   useEffect(() => {
     const fetchCompanies = async () => {
       const response = await get(`/users/me`);
@@ -22,7 +25,7 @@ export const CompanyList = ({ route, navigation }: Props) => {
     };
 
     fetchCompanies();
-  }, []);
+  }, [isFocused, refresh]);
 
   return (
     <SafeAreaView>
@@ -46,7 +49,9 @@ export const CompanyList = ({ route, navigation }: Props) => {
             CompanyListItem(
               company,
               company?.item?.owner_username === route?.params?.username,
-              navigation
+              navigation,
+              refresh,
+              setRefresh
             )
           }
           keyExtractor={(item, index) => index.toString()}
@@ -55,3 +60,5 @@ export const CompanyList = ({ route, navigation }: Props) => {
     </SafeAreaView>
   );
 };
+
+export default CompanyList;

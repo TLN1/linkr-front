@@ -1,6 +1,8 @@
 import { View, Text, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { del } from "../axios";
+import { showSuccessToast } from "./toast";
+import React from "react";
 
 interface Application {
   id: number;
@@ -13,13 +15,16 @@ interface Application {
 }
 
 export function JobApplicationListItem(
-  application,
-  setApplicationId,
-  setModalVisible,
-  setUpdateApplicationId,
-  setUpdateModalVisible,
-  myCompany
+  application: any,
+  setApplicationId: any,
+  setModalVisible: any,
+  setUpdateApplicationId: any,
+  setUpdateModalVisible: any,
+  myCompany: any,
+  refresh: any,
+  setRefresh: any
 ) {
+
   return (
     <View>
       <Pressable
@@ -63,6 +68,8 @@ export function JobApplicationListItem(
                   await del(`/application/${application?.item?.id}`)
                     .then((res) => {
                       console.log("deleted");
+                      setRefresh(!refresh);
+                      showSuccessToast("Job application deleted");
                     })
                     .catch((e) => {
                       console.log(e);
