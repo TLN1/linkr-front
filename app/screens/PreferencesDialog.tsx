@@ -3,13 +3,22 @@ import { View, Text, Button, StyleSheet } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { get, post, put } from "../axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 
 interface DropDownSchema {
     label: string;
     value: string;
 }
-const PreferenceDialog: React.FC = () => {
+
+interface Props {
+  name: string;
+  navigation: NativeStackNavigationProp<any, "Profile">;
+}
+
+const PreferenceDialog: React.FC = ({ name, navigation }: Props) => {
+
+  const [username, setUsername] = useState(name);
 
   const [industryOpen, setIndustryOpen] = useState(false);
   const [industryItems, setIndustryItems] = useState([]);
@@ -96,12 +105,9 @@ const PreferenceDialog: React.FC = () => {
           const token = await AsyncStorage.getItem("authToken");
           if (token) {
             const accessToken = JSON.parse(token).access_token;
+            
     
-            const response = await get("/user", {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            });  
+            const response = await get(`/user/${username}`);
             console.log(response.data.preference);
             setSelectedIndustries(response.data.preference.industry);
             setSelectedJobLocations(response.data.preference.job_location);

@@ -9,7 +9,9 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
-  Dimensions
+  Dimensions,
+  SectionList,
+  Button
 } from "react-native";
 import PreferenceDialog from "./PreferencesDialog";
 import { get, put } from "../axios";
@@ -521,7 +523,7 @@ const UserProfile = ({ route, navigation }: Props) => {
 
         <Pressable onPressOut={() => setIsPreferenceModalVisible(false)}>
           <View style={styles.modalContainer}>
-          <PreferenceDialog />
+          <PreferenceDialog name={route?.params?.username}/>
           </View>
         </Pressable>
       </Modal>
