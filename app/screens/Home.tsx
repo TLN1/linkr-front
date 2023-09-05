@@ -1,12 +1,17 @@
-import { View, Text } from "react-native";
-import { global } from "../styles/global";
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import SwipeView from "./SwipeView";
 
-const Home = () => {
+const Stack = createNativeStackNavigator();
+
+function Home() {
+  return <SwipeView mode="application" application_id={1} />;
+}
+
+export default function HomeNavigator() {
   return (
-    <View style={global.container}>
-      <Text>Home</Text>
-    </View>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Home" component={Home} />
+    </Stack.Navigator>
   );
-};
-
-export default Home;
+}
