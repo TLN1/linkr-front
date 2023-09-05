@@ -5,6 +5,8 @@ import Spinner from "react-native-loading-spinner-overlay";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import TlnButton from "../components/TlnButton";
 import { showErrorToast } from "../components/toast";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React from "react";
 
 interface NavigationProps {
   navigation: NativeStackNavigationProp<any, "Login">;
@@ -43,17 +45,28 @@ function Helper({ navigation, register }: HelperProps) {
     }
   };
 
-  const submitOnPress = () => {
+  const submitOnPress = async () => {
     if (!isUsernameValid || !isPasswordValid) {
       showErrorToast("Username or password is empty");
       return;
     }
 
     if (register) {
-      authContext.register(username, password);
+      await authContext.register(username, password);
     } else {
-      authContext.login(username, password);
+      await authContext.login(username, password);
     }
+
+    setUsername("");
+    setPassword("");
+
+    // const loggedInUser = await AsyncStorage.getItem("username");
+    // console.log(loggedInUser);
+
+    // if (loggedInUser) {
+    //   console.log(loggedInUser);
+    //   // navigation.navigate("User Profile", { username: loggedInUser });
+    // }
   };
 
   const onChangeInputText = (value: string, type: "username" | "password") => {
@@ -105,7 +118,7 @@ function Helper({ navigation, register }: HelperProps) {
     </View>
   );
 }
-// TODO: [NK] ADD REGISTER SCREEN, LOGIN ACTION
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

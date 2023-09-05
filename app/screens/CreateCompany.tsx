@@ -13,10 +13,12 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import { get, post, put } from "../axios";
 import * as ImagePicker from "expo-image-picker";
+import React from "react";
+import { showErrorToast } from "../components/toast";
 
 interface Props {
   navigation: NativeStackNavigationProp<any, "CreateCompany">;
-  id?: number;
+  route: any;
 }
 
 interface DropDownSchema {
@@ -31,7 +33,8 @@ interface Company {
   organizationSize: string;
 }
 
-const CreateCompany = ({ navigation, id }: Props) => {
+const CreateCompany = ({ route, navigation }: Props) => {
+  const [id, setId] = useState(route?.params?.id);
   const [hasGalleryPermission, setHasGalleryPermission] = useState(false);
   const [image, setImage] = useState("");
   const [coverImage, setCoverImage] = useState("");
@@ -77,7 +80,7 @@ const CreateCompany = ({ navigation, id }: Props) => {
 
     // console.log(result);
     if (!result.canceled) {
-      console.log(result.assets[0]);
+      // console.log(result.assets[0]);
       var filename = result.assets[0].fileName?.toLocaleLowerCase();
       if (filename) {
         var extension = filename?.substring(filename.lastIndexOf(".") + 1);
@@ -163,13 +166,13 @@ const CreateCompany = ({ navigation, id }: Props) => {
     })();
 
     if (id) fetchCompanyData(id);
-  }, []);
+  }, [id]);
 
   return (
     <View
       style={{
         backgroundColor: "white",
-        height: Dimensions.get("window").height - 65,
+        height: Dimensions.get("window").height,
       }}
     >
       <View>
@@ -195,7 +198,11 @@ const CreateCompany = ({ navigation, id }: Props) => {
         </View>
         <Pressable onPress={pickImage}>
           <View
-            style={{ alignItems: "flex-start", padding: 10, marginLeft: "5%" }}
+            style={{
+              alignItems: "flex-start",
+              padding: 10,
+              marginLeft: "5%",
+            }}
           >
             <Image
               source={
@@ -217,24 +224,31 @@ const CreateCompany = ({ navigation, id }: Props) => {
       </View>
       <View
         style={{
-          padding: 30,
-          marginHorizontal: 30,
+          padding: 20,
+          marginHorizontal: 10,
         }}
       >
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={(text) => setName(text)}
-          placeholder="Enter name"
-        />
+        <View style={{ padding: 8 }}>
+          <Text style={{ fontSize: 15, padding: 8 }}>Company name:</Text>
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={(text) => setName(text)}
+            placeholder="Enter name"
+          />
+        </View>
 
-        <TextInput
-          style={styles.input}
-          value={website}
-          onChangeText={(text) => setWebsite(text)}
-          placeholder="Enter website"
-        />
+        <View style={{ padding: 8 }}>
+          <Text style={{ fontSize: 15, padding: 8 }}>Website:</Text>
+          <TextInput
+            style={styles.input}
+            value={website}
+            onChangeText={(text) => setWebsite(text)}
+            placeholder="Enter website"
+          />
+        </View>
 
+        <Text style={{ fontSize: 15, padding: 8 }}>Industry:</Text>
         <DropDownPicker
           style={styles.dropdownone}
           containerStyle={styles.dropdownContainerStyleOne}
@@ -244,8 +258,11 @@ const CreateCompany = ({ navigation, id }: Props) => {
           setOpen={setIndustryOpen}
           setValue={setIndustry}
           placeholder="Select industry"
+          dropDownContainerStyle={styles.dropdownListContainerStyle}
           //   setItems={setIndustryItems}
         />
+
+        <Text style={{ fontSize: 15, padding: 8 }}>Organization size:</Text>
 
         <DropDownPicker
           style={styles.dropdowntwo}
@@ -257,43 +274,55 @@ const CreateCompany = ({ navigation, id }: Props) => {
           setOpen={setOrganizationSizeOpen}
           setValue={setOrganizationSize}
           placeholder="Select Organization Size"
+          dropDownContainerStyle={styles.dropdownListContainerStyle}
           //   setItems={setIndustryItems}
         />
-        <View style={{ marginTop: 60 }}>
+
+        <View style={{ padding: 10 }}>
           <Button
             title="Setup company"
             color={"black"}
             onPress={async () => {
               if (id) {
-                await put(`/company/${id}`, {
-                  name: name,
-                  website: website,
-                  industry: industry,
-                  organization_size: organizationSize,
-                  image_uri: image,
-                  cover_image_uri: coverImage,
-                })
-                  .then((res) => {
-                    console.log(res);
+                if (name && name.length > 0) {
+                  await put(`/company/${id}`, {
+                    name: name,
+                    website: website,
+                    industry: industry,
+                    organization_size: organizationSize,
+                    image_uri: image,
+                    cover_image_uri: coverImage,
                   })
-                  .catch((e) => {
-                    console.log(e);
-                  });
+                    .then((res) => {
+                      console.log(res);
+                      navigation.navigate("Company", { id: res.data?.id });
+                    })
+                    .catch((e) => {
+                      console.log(e);
+                    });
+                } else {
+                  showErrorToast("Company name cannot be empty");
+                }
               } else {
-                await post("/company", {
-                  name: name,
-                  website: website,
-                  industry: industry,
-                  organization_size: organizationSize,
-                  image_uri: image,
-                  cover_image_uri: coverImage,
-                })
-                  .then((res) => {
-                    console.log(res);
+                if (name && name.length > 0) {
+                  await post("/company", {
+                    name: name,
+                    website: website,
+                    industry: industry,
+                    organization_size: organizationSize,
+                    image_uri: image,
+                    cover_image_uri: coverImage,
                   })
-                  .catch((e) => {
-                    console.log(e);
-                  });
+                    .then((res) => {
+                      console.log(res.data?.id);
+                      navigation.navigate("Company", { id: res.data?.id });
+                    })
+                    .catch((e) => {
+                      console.log(e);
+                    });
+                } else {
+                  showErrorToast("Company name cannot be empty");
+                }
               }
             }}
           />
@@ -317,7 +346,6 @@ const styles = StyleSheet.create({
     width: "80%",
   },
   input: {
-    marginTop: 10,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: "#bbb",
@@ -325,32 +353,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   dropdownone: {
-    // marginTop: 12,
-    // marginBottom: 12,
-    // position: "absolute",
-    // position: "relative",
-    // zIndex:2,
     backgroundColor: "#fff",
     borderColor: "#bbb",
     shadowColor: "#000000",
   },
   dropdowntwo: {
-    // marginTop: 12,
-    // marginBottom: 12,
-    // position: "relative",
-    // zIndex:1,
-    // borderWidth: 0,
     backgroundColor: "#fff",
     borderColor: "#bbb",
-    // padding: 10,
-    // border:10,
     marginBottom: 15,
     shadowColor: "#000000",
   },
   dropdownContainerStyleOne: {
     zIndex: 2,
-    marginTop: 10,
-    marginBottom: 10,
+    paddingHorizontal: 8,
     borderColor: "#bbb",
     borderRadius: 5,
     position: "relative",
@@ -359,8 +374,7 @@ const styles = StyleSheet.create({
   },
   dropdownContainerStyleTwo: {
     zIndex: 1,
-    marginTop: 10,
-    marginBottom: 10,
+    paddingHorizontal: 8,
     borderColor: "#bbb",
     borderRadius: 5,
     position: "relative",
@@ -369,6 +383,18 @@ const styles = StyleSheet.create({
   },
   submitButtom: {
     borderRadius: 5,
+  },
+  dropdownListContainerStyle: {
+    borderColor: "#bbb",
+  },
+  descriptionInput: {
+    borderWidth: 1,
+    borderColor: "#bbb",
+    borderRadius: 5,
+    backgroundColor: "white",
+    maxHeight: 300,
+    padding: 10,
+    margin: 8,
   },
 });
 
