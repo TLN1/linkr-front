@@ -259,6 +259,7 @@ const CreateCompany = ({ route, navigation }: Props) => {
             items={industryItems}
             setOpen={setIndustryOpen}
             setValue={setIndustry}
+            listMode="SCROLLVIEW"
             placeholder="Select industry"
             dropDownContainerStyle={styles.dropdownListContainerStyle}
             //   setItems={setIndustryItems}
@@ -275,6 +276,7 @@ const CreateCompany = ({ route, navigation }: Props) => {
             items={organizationSizeItems}
             setOpen={setOrganizationSizeOpen}
             setValue={setOrganizationSize}
+            listMode="SCROLLVIEW"
             placeholder="Select Organization Size"
             dropDownContainerStyle={styles.dropdownListContainerStyle}
             //   setItems={setIndustryItems}
