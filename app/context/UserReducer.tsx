@@ -1,8 +1,9 @@
-import { SET_AUTH_TOKEN, CLEAR_USER_INFO, SET_USERNAME } from "../actions/AuthActions";
+import { SET_AUTH_TOKEN, CLEAR_USER_INFO, SET_USERNAME, SET_WEBSOCKET } from "../actions/AuthActions";
 
 const initialState = {
   username: null,
   authToken: null,
+  websocket: null,
 };
 
 const authReducer = (state = initialState, action) => {
@@ -22,7 +23,13 @@ const authReducer = (state = initialState, action) => {
         ...state,
         authToken: null,
         username: null,
+        websocket: null
       };
+    case SET_WEBSOCKET:
+      return {
+        ...state,
+        websocket: action.payload,
+      }
     default:
       return state;
   }

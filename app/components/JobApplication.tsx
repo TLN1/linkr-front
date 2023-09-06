@@ -10,7 +10,7 @@ import {
   Button,
 } from "react-native";
 import Checkbox from "expo-checkbox";
-import TagInput from "react-native-tags-input";
+// import TagInput from "react-native-tags-input";
 import { get } from "../axios";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -266,13 +266,13 @@ export const JobApplication = (
               <Text style={styles.paragraph}>Full-time</Text>
             </View>
             <Text style={{ fontSize: 15, padding: 8 }}>Skills:</Text>
-            <View style={styles.tagPickerContainer}>
+            {/* <View style={styles.tagPickerContainer}>
               <TagInput
                 inputContainerStyle={styles.tagPickerInput}
                 updateState={updateTagPickerState}
                 tags={tagPickerState.tags}
               />
-            </View>
+            </View> */}
 
             <View>
               <Text style={{ fontSize: 15, padding: 8 }}>Description:</Text>

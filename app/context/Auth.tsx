@@ -9,13 +9,14 @@ import {
   clearUserInfo,
   setUserToken,
   setUsername,
+  setWebsocket,
 } from "../actions/AuthActions";
 
 export const AuthContext = createContext<AuthContextType>({
   isLoading: false,
-  register: async (username, password) => {},
-  login: async (username, password) => {},
-  logout: async () => {},
+  register: async (username, password) => { },
+  login: async (username, password) => { },
+  logout: async () => { },
 });
 
 export interface AuthContextType {
@@ -76,7 +77,7 @@ const AuthProvider = ({ children }: any) => {
         setIsLoading(false);
         console.log(userInfo);
       })
-      .catch((e) => {})
+      .catch((e) => { })
       .finally(() => setIsLoading(false));
   };
 
@@ -105,10 +106,27 @@ const AuthProvider = ({ children }: any) => {
         AsyncStorage.setItem("username", username);
         console.log(username);
 
+
         dispatch(setUserToken(JSON.stringify(authToken)));
         dispatch(setUsername(username));
+
+        // const websocketUrl = `ws://http://127.0.0.1/register/ws/${username}`;
+        // console.log(websocketUrl);
+
+        // const ws = new WebSocket(websocketUrl);
+        // ws.onopen = () => {
+        //   console.log(`WebSocket connection opened for user ${username}`);
+        // };
+        // // store.dispatch(setWebsocket(ws));
+        const websocketUrl = `ws://127.0.0.1:8000/register/ws/${username}`;
+        console.log(websocketUrl);
+        const ws = new WebSocket(websocketUrl);
+        ws.onopen = () => {
+          console.log(`WebSocket connection opened for user ${username}`);
+        };
+        dispatch(setWebsocket(ws));
       })
-      .catch((e) => {})
+      .catch((e) => { })
       .finally(() => setIsLoading(false));
   };
 
@@ -117,7 +135,7 @@ const AuthProvider = ({ children }: any) => {
     await AsyncStorage.removeItem("userInfo");
     await AsyncStorage.removeItem("username");
     dispatch(clearUserInfo());
-  };  
+  };
 
   return (
     <AuthContext.Provider
