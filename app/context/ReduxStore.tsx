@@ -15,7 +15,7 @@ AsyncStorage.getItem('username').then((username) => {
   if (username) {
     store.dispatch(setUsername(username));
 
-    const websocketUrl = `ws://127.0.0.1:8000/register/ws/${username}`;
+    const websocketUrl = `ws://0.0.0.0:8000/register/ws/${username}`;
     console.log(websocketUrl);
     const ws = new WebSocket(websocketUrl);
     ws.onopen = () => {

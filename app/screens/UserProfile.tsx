@@ -12,6 +12,7 @@ import {
   Dimensions,
   SectionList,
   Button,
+  Switch,
 } from "react-native";
 import { get, put } from "../axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -19,6 +20,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native-virtualized-view";
 import { AuthContext } from "../context/Auth";
 import * as ImagePicker from "expo-image-picker";
+import PreferenceDialog from "./PreferencesDialog";
+import JobApplicationSelector from "./JobApplicationSelector";
+import { useDispatch, useSelector } from "react-redux";
+import { setSwitchState } from "../actions/PresetActions";
 
 interface Education {
   name: string;
@@ -40,6 +45,50 @@ interface Props {
   navigation: NativeStackNavigationProp<any, "Profile">;
 }
 const UserProfile = ({ route, navigation }: Props) => {
+  const dispatch = useDispatch();
+  const [isPreferenceModalVisible, setIsPreferenceModalVisible] =
+    React.useState(false);
+  const [isJobSelectorVisible, setIsJobSelectorVisible] = React.useState(false);
+  const [buttonType, setButtonType] = React.useState("for user");
+  const switchState = useSelector((state) => state.preset.switchState);
+
+  const savePreferences = async (
+    selectedIndustries: any,
+    selectedJobLocations: any,
+    selectedJobTypes: any,
+    selectedExperienceLevels: any
+  ) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (token) {
+        const accessToken = JSON.parse(token).access_token;
+
+        await put(
+          "/preferences/update",
+          {
+            industry: selectedIndustries,
+            job_location: selectedJobLocations,
+            job_type: selectedJobTypes,
+            experience_level: selectedExperienceLevels,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error updating education:", error);
+    }
+    setIsPreferenceModalVisible(false);
+  };
+
+  const cancelPreferences = () => {
+    setIsPreferenceModalVisible(false);
+    setIsJobSelectorVisible(false);
+  };
+
   const [hasGalleryPermission, setHasGalleryPermission] = useState(false);
   const [addingItem, setAddingItem] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
@@ -141,7 +190,6 @@ const UserProfile = ({ route, navigation }: Props) => {
     const response = await get(`/user/${username}`);
     const userData = response.data;
 
-
     console.log(response.data?.username);
 
     setEducations(userData.education || []);
@@ -166,7 +214,6 @@ const UserProfile = ({ route, navigation }: Props) => {
       skills: skills,
       experience: [...expreniences, newExperience],
     });
-
 
     updateUser();
 
@@ -322,34 +369,34 @@ const UserProfile = ({ route, navigation }: Props) => {
       item: Education | Skill | Experience;
     }) => JSX.Element;
   }[] = [
-      {
-        title: "Education",
-        data: educations,
-        renderItem: renderEducationItem as ({
-          item,
-        }: {
-          item: Education | Skill | Experience;
-        }) => JSX.Element,
-      },
-      {
-        title: "Skill",
-        data: skills,
-        renderItem: renderSkillsItem as ({
-          item,
-        }: {
-          item: Education | Skill | Experience;
-        }) => JSX.Element,
-      },
-      {
-        title: "Experience",
-        data: expreniences,
-        renderItem: renderExperienceItem as ({
-          item,
-        }: {
-          item: Education | Skill | Experience;
-        }) => JSX.Element,
-      },
-    ];
+    {
+      title: "Education",
+      data: educations,
+      renderItem: renderEducationItem as ({
+        item,
+      }: {
+        item: Education | Skill | Experience;
+      }) => JSX.Element,
+    },
+    {
+      title: "Skill",
+      data: skills,
+      renderItem: renderSkillsItem as ({
+        item,
+      }: {
+        item: Education | Skill | Experience;
+      }) => JSX.Element,
+    },
+    {
+      title: "Experience",
+      data: expreniences,
+      renderItem: renderExperienceItem as ({
+        item,
+      }: {
+        item: Education | Skill | Experience;
+      }) => JSX.Element,
+    },
+  ];
 
   const renderSectionHeader = ({
     section: { title },
@@ -510,6 +557,12 @@ const UserProfile = ({ route, navigation }: Props) => {
               style={{ width: Dimensions.get("window").width, height: 150 }}
             ></Image>
           </Pressable>
+          <Pressable>
+            <Image
+              source={require("../assets/icon.png")}
+              style={{ width: 30, height: 30 }}
+            />
+          </Pressable>
         </View>
         <Pressable onPress={pickImage}>
           <View
@@ -536,6 +589,98 @@ const UserProfile = ({ route, navigation }: Props) => {
           <Text style={{ fontSize: 30, fontWeight: "bold" }}>{username}</Text>
         </View>
         <View style={{ flexDirection: "row", marginLeft: "4%" }}></View>
+
+        <View style={{ height: 50, backgroundColor: "white" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            {username && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                {buttonType === "for user" && (
+                  <Button
+                    title="Job seeker"
+                    onPress={() => setIsPreferenceModalVisible(true)}
+                  />
+                )}
+                {buttonType === "for company" && (
+                  <Button
+                    title="Recruiter"
+                    onPress={() => setIsJobSelectorVisible(true)}
+                  />
+                )}
+                <Switch
+                  value={switchState}
+                  onValueChange={(value) => {
+                    if (buttonType === "for user") {
+                      setButtonType("for company");
+                      dispatch(setSwitchState(true));
+                    } else if (buttonType === "for company") {
+                      setButtonType("for user");
+                      dispatch(setSwitchState(false));
+                    }
+                  }}
+                />
+              </View>
+            )}
+          </View>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Modal
+            visible={isPreferenceModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setIsPreferenceModalVisible(false)}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                width: "100%",
+                maxHeight: Dimensions.get("window").height,
+              }}
+            >
+              <PreferenceDialog
+                name={username}
+                onSavePreferences={savePreferences}
+                onCancel={cancelPreferences}
+              />
+            </View>
+          </Modal>
+          <Modal
+            visible={isJobSelectorVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setIsJobSelectorVisible(false)}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                width: "100%",
+                maxHeight: Dimensions.get("window").height,
+              }}
+            >
+              <JobApplicationSelector
+                name={username}
+                onCancel={cancelPreferences}
+              />
+            </View>
+          </Modal>
+        </View>
 
         {/* SectionList for Education, Skills, and Experience */}
         <SectionList
