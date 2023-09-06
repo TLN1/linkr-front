@@ -6,7 +6,7 @@ import React from "react";
 import { get, put } from "../axios";
 import { BASE_URL } from "../Constants";
 import { useIsFocused } from "@react-navigation/native";
-import { showErrorToast } from "../components/toast";
+import { showErrorToast, showSuccessToast } from "../components/toast";
 
 interface SwipeViewProps {
   mode: "profile" | "application";
@@ -193,6 +193,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
   };
 
   useEffect(() => {
+    console.log("EMPTY CARDS");
     setCards([]);
     fetchData();
   }, [isFocused, mode]);
@@ -207,7 +208,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
     })
       .then((response) => {
         if (response.data.matched) {
-          showErrorToast("YOU GOT A MATCH");
+          showSuccessToast("YOU GOT A MATCH");
         }
       })
       .catch((e) => {
@@ -250,7 +251,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
       );
     }
 
-    if (cardIndex >= cards.length - 3) {
+    if (cardIndex === cards.length - 2) {
       fetchData();
     }
   };
@@ -270,7 +271,7 @@ export default function SwipeView({ mode, application_id }: SwipeViewProps) {
       );
     }
 
-    if (cardIndex >= cards.length - 3) {
+    if (cardIndex === cards.length - 2) {
       fetchData();
     }
   };

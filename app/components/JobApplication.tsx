@@ -16,7 +16,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { Ionicons } from "@expo/vector-icons";
 
 export const JobApplication = (
-  applications: any [],
+  applications: any[],
   setApplications: any,
   setVisible: any,
   company_id: number,
@@ -33,7 +33,7 @@ export const JobApplication = (
     description: string
   ) => Promise<any>,
   refresh: boolean,
-  setRefresh: any 
+  setRefresh: any
 ) => {
   const [onSiteChecked, setOnSiteChecked] = useState(false);
   const [remoteChecked, setRemoteChecked] = useState(false);
@@ -305,6 +305,11 @@ export const JobApplication = (
                 setJobType("");
                 setJobLocation("");
                 setDescription("");
+                setOnSiteChecked(false);
+                setRemoteChecked(false);
+                setHybridChecked(false);
+                setFullTimeChecked(false);
+                setPartTimeChecked(false);
                 setTagPickerState({
                   tags: {
                     tag: "",

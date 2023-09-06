@@ -2,7 +2,7 @@ import { SET_APPLICATION_ID, SET_SWITCH_STATE } from "../actions/PresetActions";
 
 const initialState = {
   jobApplicationId: null,
-  switchState: null
+  switchState: false,
 };
 
 const presetReducer = (state = initialState, action) => {
@@ -12,7 +12,7 @@ const presetReducer = (state = initialState, action) => {
         ...state,
         jobApplicationId: action.payload,
       };
-      case SET_SWITCH_STATE:
+    case SET_SWITCH_STATE:
       return {
         ...state,
         switchState: action.payload,
