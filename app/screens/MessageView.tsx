@@ -7,8 +7,9 @@ import Messages from "../components/chat/Messages";
 import { MessageItem } from "../components/chat/Messages";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import WebSocketSingleton from "../WebSocketSingleton";
+// import WebSocketSingleton from "../WebSocketSingleton";
 import { get, post, put } from "../axios";
+import { useSelector } from "react-redux";
 
 
 interface MessagesViewProps {
@@ -21,7 +22,10 @@ const MessagesView = ({ route, navigation }: MessagesViewProps) => {
   // const [recipient, setRecipient] = useState<string>("");
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [message, setMessage] = useState<string>("");
-  const wsRef = useRef<WebSocket | null>(null);
+
+  const ws = useSelector((state) => state.auth.websocket);
+
+  // const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     async function getSocket() {
@@ -43,12 +47,14 @@ const MessagesView = ({ route, navigation }: MessagesViewProps) => {
           ));
         });
 
-        const websocketUrl = `ws://127.0.0.1:8000/register/ws/${route?.params?.username}`;
-        wsRef.current = WebSocketSingleton.getWebSocket(route?.params?.username, websocketUrl);
+        // const websocketUrl = `ws://127.0.0.1:8000/register/ws/${route?.params?.username}`;
+        // wsRef.current = WebSocketSingleton.getWebSocket(route?.params?.username, websocketUrl);
 
-        wsRef.current.onmessage = (e) => {
+        if (ws != null){
+          ws.onmessage = (e) => {
           setMessages((prevMessages) => [...prevMessages, JSON.parse(e.data)]);
         };
+      }
       }
 
     }
@@ -60,9 +66,11 @@ const MessagesView = ({ route, navigation }: MessagesViewProps) => {
   const sendMessage = (messageText: string) => {
     console.log("send message :" + messageText);
     console.log(route?.params?.recipient);
-    if (wsRef.current !== null) {
-      console.log("before eocket send:" + messageText);
-      wsRef.current.send(JSON.stringify({ "user": route?.params?.recipient, "time": "12:00", "text": messageText }));
+    if (ws !== null) {
+      console.log("before socket send:" + messageText);
+      const now = new Date();
+      console.log(now.toLocaleTimeString().toString());
+      ws.send(JSON.stringify({ "user": route?.params?.recipient, "time": now.toLocaleTimeString(), "text": messageText }));
     }
     // setMessage("");
   };

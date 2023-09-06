@@ -38,13 +38,13 @@ const SingleChatEntry = ({ recipient, chat}: Props) => {
                         justifyContent: 'space-between'
                     }}>
                         <Text style={styles.username}>{recipient}</Text>
-                        <Text style={styles.time}>{"12:00"}</Text>
+                        <Text style={styles.time}>{chat.message_list[chat.message_list.length - 1].time}</Text>
                     </View>
                     <View style={{
                         flexDirection: 'row',
                         justifyContent: 'space-between'
                     }}>
-                        <Text style={styles.message}>{"lastMessage"}</Text>
+                        <Text style={styles.message}>{chat.message_list[chat.message_list.length - 1].text}</Text>
                         {/* notifications?? */}
                     </View>
                 </View>
